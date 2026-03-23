@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Il Cervello e le Droghe</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Bangers&family=Cormorant+Garamond:ital,wght@0,600;1,400;1,600&family=Nunito:wght@400;600;700;800;900&display=swap');
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{background:#080610;font-family:'Nunito',sans-serif;color:#fff;user-select:none;}
+
+/* ── SCREENS ─────────────────────────────── */
+.screen{position:fixed;inset:0;z-index:5;display:none;}
+.screen.active{display:block;}
+
+/* ── SHARED CANVAS ──────────────────────── */
+canvas{position:fixed;inset:0;z-index:1;display:none;}
+canvas.active{display:block;}
+
+/* ── INDEX ──────────────────────────────── */
+#s-index{z-index:6;}
+.idx-page{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(12px,2.5vh,26px);padding:16px;}
+.top-lbl{font-size:clamp(8px,1.2vw,11px);letter-spacing:0.3em;color:rgba(255,255,255,0.26);text-transform:uppercase;animation:fup .7s .2s both;}
+.main-title{text-align:center;animation:fup .8s .4s both;}
+.main-title h1{font-family:‘Abril Fatface’,cursive;font-size:clamp(26px,6vw,68px);line-height:.95;background:linear-gradient(135deg,#ff9a9e,#fad0c4,#a1c4fd,#c2e9fb,#d4fc79,#ff9a9e);background-size:300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:hsh 6s linear infinite;}
+.main-title p{font-size:clamp(9px,1.3vw,13px);color:rgba(255,255,255,0.35);letter-spacing:.1em;margin-top:5px;font-style:italic;}
+.divider{width:clamp(45px,8vw,90px);height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);animation:fup .6s .6s both;}
+.cards{display:flex;gap:clamp(8px,1.8vw,18px);align-items:stretch;animation:fup .9s .75s both;flex-wrap:wrap;justify-content:center;}
+.card{position:relative;flex:1;min-width:clamp(150px,20vw,220px);max-width:260px;border-radius:14px;padding:clamp(14px,2.2vw,22px);cursor:pointer;overflow:hidden;transition:transform .32s cubic-bezier(.34,1.56,.64,1),box-shadow .32s;display:flex;flex-direction:column;gap:8px;border:1.5px solid transparent;text-decoration:none;}
+.card::before{content:’’;position:absolute;inset:0;border-radius:14px;opacity:0;transition:opacity .3s;z-index:0;}
+.card:hover{transform:translateY(-7px) scale(1.03);}
+.card>*{position:relative;z-index:1;}
+/* card 1 */
+.c1{background:linear-gradient(145deg,rgba(18,12,4,.96),rgba(28,16,3,.92));border-color:rgba(255,200,0,.22);box-shadow:0 4px 24px rgba(255,180,0,.07);}
+.c1::before{background:radial-gradient(ellipse at 50% 0%,rgba(255,200,0,.11),transparent 68%);}
+.c1:hover{box-shadow:0 14px 44px rgba(255,180,0,.22);border-color:rgba(255,200,0,.52);}
+.c1:hover::before{opacity:1;}
+.c1 .c-cat{font-family:‘Bangers’,cursive;font-size:clamp(8px,1.1vw,10px);letter-spacing:.2em;color:rgba(255,200,0,.5);text-transform:uppercase;}
+.c1 h2{font-family:‘Bangers’,cursive;font-size:clamp(17px,2.6vw,26px);color:#ffcc00;letter-spacing:.05em;line-height:1;text-shadow:0 0 14px rgba(255,200,0,.4);}
+.c1 p{font-size:clamp(9px,1.1vw,11px);color:rgba(255,220,150,.6);line-height:1.5;}
+.c1 .tag{background:rgba(255,200,0,.1);border:1px solid rgba(255,200,0,.28);color:rgba(255,200,0,.7);}
+.c1 .arr{color:rgba(255,200,0,.45);}
+/* card 2 */
+.c2{background:linear-gradient(145deg,rgba(4,6,18,.96),rgba(5,9,26,.92));border-color:rgba(100,150,248,.18);box-shadow:0 4px 24px rgba(80,120,220,.06);}
+.c2::before{background:radial-gradient(ellipse at 50% 0%,rgba(100,150,248,.09),transparent 68%);}
+.c2:hover{box-shadow:0 14px 44px rgba(80,120,220,.2);border-color:rgba(138,180,248,.48);}
+.c2:hover::before{opacity:1;}
+.c2 .c-cat{font-family:‘Cormorant Garamond’,serif;font-size:clamp(8px,1.1vw,10px);letter-spacing:.2em;color:rgba(138,180,248,.48);font-style:italic;}
+.c2 h2{font-family:‘Cormorant Garamond’,serif;font-size:clamp(17px,2.6vw,26px);color:#8ab4f8;font-weight:600;line-height:1;text-shadow:0 0 12px rgba(100,150,248,.32);}
+.c2 p{font-size:clamp(9px,1.1vw,11px);color:rgba(160,195,255,.58);line-height:1.5;}
+.c2 .tag{background:rgba(138,180,248,.09);border:1px solid rgba(138,180,248,.26);color:rgba(138,180,248,.68);}
+.c2 .arr{color:rgba(138,180,248,.42);}
+/* card 3 */
+.c3{background:linear-gradient(145deg,rgba(8,4,18,.96),rgba(12,5,24,.92));border-color:rgba(168,85,247,.2);box-shadow:0 4px 24px rgba(150,70,230,.07);}
+.c3::before{background:radial-gradient(ellipse at 50% 0%,rgba(168,85,247,.11),transparent 68%);}
+.c3:hover{box-shadow:0 14px 44px rgba(150,70,230,.22);border-color:rgba(192,132,252,.5);}
+.c3:hover::before{opacity:1;}
+.c3 .c-cat{font-family:‘Abril Fatface’,cursive;font-size:clamp(8px,1.1vw,10px);letter-spacing:.14em;color:rgba(192,132,252,.48);}
+.c3 h2{font-family:‘Abril Fatface’,cursive;font-size:clamp(17px,2.6vw,26px);background:linear-gradient(90deg,#ff6ec7,#a855f7,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.05;}
+.c3 p{font-size:clamp(9px,1.1vw,11px);color:rgba(200,170,240,.58);line-height:1.5;}
+.c3 .tag{background:rgba(168,85,247,.09);border:1px solid rgba(168,85,247,.28);color:rgba(192,132,252,.68);}
+.c3 .arr{color:rgba(192,132,252,.42);}
+.icon{font-size:clamp(26px,3.8vw,40px);}
+.drug-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px;}
+.tag{font-size:clamp(7px,.95vw,9px);letter-spacing:.07em;border-radius:20px;padding:1px 8px;display:inline-block;}
+.arr{font-size:clamp(14px,2vw,20px);align-self:flex-end;margin-top:auto;transition:transform .22s;}
+.card:hover .arr{transform:translateX(4px);}
+.idx-footer{animation:fup .7s 1.1s both;text-align:center;}
+.idx-footer p{font-size:clamp(8px,1vw,10px);color:rgba(255,255,255,.18);letter-spacing:.07em;}
+
+@keyframes fup{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes hsh{0%{background-position:0%}100%{background-position:300%}}
+
+/* ── SHARED ANIMATION UI ─────────────────── */
+.anim-wrap{position:absolute;inset:0;z-index:5;}
+header{position:fixed;top:0;left:0;right:0;z-index:20;padding:9px 14px 5px;display:flex;align-items:center;gap:9px;background:linear-gradient(180deg,rgba(7,3,14,.97) 72%,transparent);}
+.h-tag{font-size:clamp(9px,1.3vw,12px);letter-spacing:.1em;padding:2px 10px;border-radius:4px;flex-shrink:0;}
+.h-title{flex:1;}
+.h-title h1{font-size:clamp(13px,2.6vw,23px);letter-spacing:.03em;}
+.h-title small{display:block;font-size:clamp(8px,.95vw,10px);font-style:italic;opacity:.45;margin-top:1px;}
+.back-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.55);font-family:‘Nunito’,sans-serif;font-size:11px;border-radius:20px;padding:4px 12px;cursor:pointer;flex-shrink:0;transition:all .2s;}
+.back-btn:hover{background:rgba(255,255,255,.12);color:#fff;}
+
+/* legend */
+#leg{position:fixed;right:12px;top:50%;transform:translateY(-50%);z-index:20;display:flex;flex-direction:column;gap:6px;width:clamp(115px,15vw,155px);}
+.lb{border-radius:7px;padding:7px 10px;}
+.ll{font-size:8px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px;}
+.lv{font-size:clamp(12px,1.7vw,15px);font-weight:900;transition:color .9s;margin-bottom:2px;}
+.lbg{height:3.5px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;}
+.lbf{height:100%;border-radius:2px;transition:width 1.1s cubic-bezier(.4,0,.2,1),background 1s;}
+.lstate{font-size:clamp(8px,1vw,10px);font-weight:700;line-height:1.3;opacity:.8;}
+
+/* card */
+#tcard{position:fixed;bottom:68px;left:50%;transform:translateX(-50%);width:clamp(250px,54vw,540px);z-index:20;}
+.ci{border-radius:11px;padding:12px 17px 10px;opacity:0;transform:translateY(10px);transition:all .42s cubic-bezier(.34,1.4,.64,1);}
+.ci.show{opacity:1;transform:translateY(0);}
+.cbadge{font-size:9px;letter-spacing:.13em;padding:1px 9px;border-radius:20px;display:inline-block;margin-bottom:4px;}
+.ci h2{font-size:clamp(12px,1.8vw,18px);margin-bottom:4px;line-height:1.1;}
+.ci p{font-size:clamp(9.5px,1.25vw,12px);line-height:1.68;opacity:.84;}
+
+/* dots */
+#dots{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:20;border-radius:40px;padding:5px 12px;}
+.dot{width:clamp(21px,2.7vw,27px);height:clamp(21px,2.7vw,27px);border-radius:50%;font-size:10px;cursor:pointer;transition:all .24s;display:flex;align-items:center;justify-content:center;font-weight:900;}
+.dot:hover{transform:scale(1.16);}
+.hint{position:fixed;bottom:1px;left:50%;transform:translateX(-50%);font-size:8px;opacity:.22;z-index:20;white-space:nowrap;pointer-events:none;font-style:italic;}
+#abtn{position:fixed;top:8px;right:12px;z-index:30;font-size:11px;letter-spacing:.07em;border-radius:20px;padding:4px 12px;cursor:pointer;transition:all .2s;border:none;}
+#abtn:hover{transform:scale(1.07);}
+#sbtn{position:fixed;bottom:75px;right:12px;z-index:30;font-size:14px;border-radius:50%;width:30px;height:30px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;}
+#sbtn.muted{opacity:.28;}
+#fsbtn{position:fixed;bottom:112px;right:12px;z-index:30;font-size:13px;border-radius:50%;width:30px;height:30px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);}
+#fsbtn:hover{background:rgba(255,255,255,.14);color:#fff;}
+/* audio unlock prompt on intro */
+.iv-audio-hint{font-size:9px;color:rgba(255,255,255,.22);letter-spacing:.1em;margin-top:2px;font-style:italic;animation:fup .5s 1.5s both;}
+
+/* intro overlay */
+.intro-ov{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;transition:opacity .9s ease;}
+.intro-ov.gone{opacity:0;pointer-events:none;}
+.iv-lbl{font-size:clamp(9px,1.5vw,13px);letter-spacing:.35em;text-transform:uppercase;animation:fup .7s .25s both;}
+.iv-big{font-size:clamp(36px,8.5vw,92px);letter-spacing:.06em;text-align:center;line-height:.9;animation:fup .8s .5s both;}
+.iv-sub{font-size:clamp(10px,1.4vw,14px);letter-spacing:.14em;animation:fup .6s .78s both;}
+.iv-line{width:85px;height:1.5px;animation:fup .5s .98s both;}
+.iv-skip{font-size:9.5px;letter-spacing:.12em;cursor:pointer;animation:fup .5s 1.25s both;transition:opacity .25s;margin-top:4px;opacity:.3;}
+.iv-skip:hover{opacity:.7;}
+
+/* ── STIMOLANTI THEME ── */
+.th-stim header{background:linear-gradient(180deg,rgba(10,10,15,.97) 72%,transparent);}
+.th-stim .h-tag{background:#ffcc00;color:#0a0a0f;font-family:‘Bangers’,cursive;}
+.th-stim .h-title h1{font-family:‘Bangers’,cursive;color:#ffcc00;text-shadow:0 0 16px rgba(255,200,0,.45);}
+.th-stim header{background:linear-gradient(180deg,rgba(10,10,15,.97) 72%,transparent);}
+.th-stim .lb{background:rgba(10,10,15,.93);border:1px solid rgba(255,200,0,.13);}
+.th-stim .ll{color:rgba(255,200,0,.42);}
+.th-stim .ci{background:rgba(10,10,15,.96);border:2px solid #ffcc00;box-shadow:0 0 24px rgba(255,200,0,.12);}
+.th-stim .cbadge{background:#ffcc00;color:#0a0a0f;font-family:‘Bangers’,cursive;}
+.th-stim .ci h2{font-family:‘Bangers’,cursive;color:#ffcc00;text-shadow:0 0 10px rgba(255,200,0,.38);}
+.th-stim .ci p b{color:#ffcc00;}
+.th-stim #dots{background:rgba(10,10,15,.92);border:1.5px solid rgba(255,200,0,.2);}
+.th-stim .dot{background:rgba(255,200,0,.05);border:1.5px solid rgba(255,200,0,.17);color:rgba(255,200,0,.36);font-family:‘Bangers’,cursive;}
+.th-stim .dot.active{background:rgba(255,200,0,.17);border-color:#ffcc00;color:#ffcc00;box-shadow:0 0 10px rgba(255,200,0,.48);}
+.th-stim .dot.done{background:rgba(255,200,0,.09);border-color:rgba(255,200,0,.3);color:rgba(255,200,0,.5);}
+.th-stim #abtn{background:#ffcc00;color:#0a0a0f;font-family:‘Bangers’,cursive;box-shadow:0 0 12px rgba(255,200,0,.3);}
+.th-stim #abtn.pl{background:#ff4500;color:#fff;}
+.th-stim #sbtn{background:rgba(255,200,0,.08);border:1px solid rgba(255,200,0,.26);color:rgba(255,200,0,.6);}
+.th-stim .intro-ov{background:#0a0a0f;}
+.th-stim .iv-lbl{color:rgba(255,200,0,.42);}
+.th-stim .iv-big{font-family:‘Bangers’,cursive;color:#ffcc00;text-shadow:0 0 55px rgba(255,200,0,.5),0 0 110px rgba(255,100,0,.25);}
+.th-stim .iv-sub{font-family:‘Bangers’,cursive;color:rgba(255,160,0,.45);}
+.th-stim .iv-line{background:linear-gradient(90deg,transparent,#ffcc00,transparent);}
+.th-stim .hint{color:rgba(255,200,0,.22);}
+body::before{content:’’;position:fixed;inset:0;z-index:0;background-image:radial-gradient(circle,rgba(255,200,0,.045) 1px,transparent 1px);background-size:24px 24px;pointer-events:none;}
+
+/* ── DEPRESSIVI THEME ── */
+.th-dep header{background:linear-gradient(180deg,rgba(5,7,14,.98) 72%,transparent);}
+.th-dep .h-tag{color:#8ab4f8;border:1px solid rgba(138,180,248,.3);border-radius:20px;font-family:‘Cormorant Garamond’,serif;font-style:italic;}
+.th-dep .h-title h1{font-family:‘Cormorant Garamond’,serif;color:#8ab4f8;font-weight:600;text-shadow:0 0 14px rgba(100,150,248,.3);}
+.th-dep .lb{background:rgba(5,7,18,.93);border:1px solid rgba(138,180,248,.11);}
+.th-dep .ll{color:rgba(138,180,248,.38);}
+.th-dep .ci{background:rgba(5,7,18,.96);border:1.5px solid rgba(138,180,248,.26);box-shadow:0 0 30px rgba(80,110,200,.08);}
+.th-dep .cbadge{color:#8ab4f8;border:1px solid rgba(138,180,248,.3);font-family:‘Cormorant Garamond’,serif;font-style:italic;}
+.th-dep .ci h2{font-family:‘Cormorant Garamond’,serif;color:#8ab4f8;font-weight:600;}
+.th-dep .ci p b{color:#8ab4f8;}
+.th-dep .ci p{color:rgba(200,215,245,.82);}
+.th-dep #dots{background:rgba(5,7,18,.93);border:1px solid rgba(138,180,248,.17);}
+.th-dep .dot{background:rgba(138,180,248,.05);border:1px solid rgba(138,180,248,.16);color:rgba(138,180,248,.33);font-family:‘Cormorant Garamond’,serif;}
+.th-dep .dot.active{background:rgba(138,180,248,.15);border-color:#8ab4f8;color:#8ab4f8;box-shadow:0 0 10px rgba(138,180,248,.28);}
+.th-dep .dot.done{background:rgba(138,180,248,.07);border-color:rgba(138,180,248,.26);color:rgba(138,180,248,.48);}
+.th-dep #abtn{background:rgba(138,180,248,.11);border:1px solid rgba(138,180,248,.34);color:#8ab4f8;font-family:‘Cormorant Garamond’,serif;font-style:italic;}
+.th-dep #abtn.pl{color:rgba(180,190,220,.5);}
+.th-dep #sbtn{background:rgba(138,180,248,.07);border:1px solid rgba(138,180,248,.23);color:rgba(138,180,248,.58);}
+.th-dep .intro-ov{background:#05070e;}
+.th-dep .iv-lbl{font-family:‘Cormorant Garamond’,serif;font-style:italic;color:rgba(138,180,248,.36);}
+.th-dep .iv-big{font-family:‘Cormorant Garamond’,serif;font-weight:600;color:#8ab4f8;text-shadow:0 0 45px rgba(100,150,248,.38);}
+.th-dep .iv-sub{font-family:‘Cormorant Garamond’,serif;font-style:italic;color:rgba(138,180,248,.38);}
+.th-dep .iv-line{background:linear-gradient(90deg,transparent,rgba(138,180,248,.55),transparent);}
+.th-dep .hint{color:rgba(138,180,248,.2);}
+
+/* ── ALLUCINOGENI THEME ── */
+.th-allu header{background:linear-gradient(180deg,rgba(7,3,14,.97) 72%,transparent);}
+.th-allu .h-tag{font-family:‘Abril Fatface’,cursive;background:linear-gradient(90deg,#ff6ec7,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;border:1px solid rgba(168,85,247,.33);border-radius:20px;}
+.th-allu .h-title h1{font-family:‘Abril Fatface’,cursive;background:linear-gradient(90deg,#ff6ec7,#a855f7,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.th-allu .lb{background:rgba(7,3,18,.93);border:1px solid rgba(168,85,247,.12);}
+.th-allu .ll{font-family:‘Abril Fatface’,cursive;color:rgba(192,132,252,.38);}
+.th-allu .ci{background:rgba(7,3,18,.96);border:1.5px solid rgba(168,85,247,.3);box-shadow:0 0 30px rgba(168,85,247,.09);}
+.th-allu .cbadge{font-family:‘Abril Fatface’,cursive;background:linear-gradient(90deg,#ff6ec7,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;border:1px solid rgba(168,85,247,.3);}
+.th-allu .ci h2{font-family:‘Abril Fatface’,cursive;background:linear-gradient(90deg,#ff6ec7,#a855f7,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.th-allu .ci p b{color:#c084fc;}
+.th-allu .ci p{color:rgba(220,210,240,.84);}
+.th-allu #dots{background:rgba(7,3,18,.93);border:1px solid rgba(168,85,247,.17);}
+.th-allu .dot{background:rgba(168,85,247,.05);border:1px solid rgba(168,85,247,.17);color:rgba(192,132,252,.36);font-family:‘Abril Fatface’,cursive;}
+.th-allu .dot.active{background:rgba(168,85,247,.17);border-color:#c084fc;color:#c084fc;box-shadow:0 0 11px rgba(168,85,247,.45);}
+.th-allu .dot.done{background:rgba(168,85,247,.08);border-color:rgba(168,85,247,.28);color:rgba(192,132,252,.52);}
+.th-allu #abtn{background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.36);color:#c084fc;font-family:‘Abril Fatface’,cursive;}
+.th-allu #abtn.pl{color:rgba(200,170,230,.48);}
+.th-allu #sbtn{background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.23);color:rgba(192,132,252,.58);}
+.th-allu .intro-ov{background:#07030e;}
+.th-allu .iv-lbl{font-family:‘Abril Fatface’,cursive;background:linear-gradient(90deg,#ff6ec7,#a855f7,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.th-allu .iv-big{font-family:‘Abril Fatface’,cursive;background:linear-gradient(135deg,#ff6ec7,#a855f7,#38bdf8,#34d399,#ff6ec7);background-size:300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:fup .8s .5s both,hsh 4s linear infinite;}
+.th-allu .iv-sub{font-family:‘Abril Fatface’,cursive;color:rgba(168,85,247,.4);}
+.th-allu .iv-line{background:linear-gradient(90deg,transparent,#a855f7,transparent);}
+.th-allu .hint{color:rgba(168,85,247,.2);}
+
+/* ── FINALE SCREEN ─────────────────────────── */
+#s-finale{z-index:40;background:#050308;display:none;}
+#s-finale.active{display:block;}
+#finale-canvas{position:absolute;inset:0;z-index:1;}
+.finale-ui{position:absolute;inset:0;z-index:10;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr auto;gap:0;pointer-events:none;}
+.finale-top{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;padding:clamp(14px,2.5vh,28px) 20px 0;gap:6px;}
+.finale-eyebrow{font-size:clamp(8px,1.1vw,11px);letter-spacing:.35em;text-transform:uppercase;opacity:0;animation:fup .6s .2s both;}
+.finale-headline{font-size:clamp(22px,4.5vw,52px);text-align:center;line-height:1;opacity:0;animation:fup .7s .45s both;}
+.finale-sub{font-size:clamp(9px,1.2vw,13px);opacity:.5;letter-spacing:.1em;opacity:0;animation:fup .6s .7s both;}
+/* left: brain 3d + verdict */
+.finale-left{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(10px,2vh,20px);padding:10px 10px 10px 20px;}
+#brain3d-canvas{border-radius:50%;flex-shrink:0;}
+.verdict-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:clamp(10px,1.5vw,16px) clamp(12px,2vw,20px);max-width:340px;width:100%;}
+.verdict-label{font-size:8px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;margin-bottom:6px;}
+#verdict-text{font-size:clamp(10px,1.3vw,13px);line-height:1.75;min-height:60px;color:rgba(255,255,255,.88);}
+#verdict-text b{font-weight:900;}
+.verdict-cursor{display:inline-block;width:2px;height:1em;vertical-align:middle;margin-left:2px;animation:blink .7s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+/* right: bar chart */
+.finale-right{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(8px,1.5vh,16px);padding:10px 20px 10px 10px;}
+.chart-title{font-size:clamp(9px,1.2vw,12px);letter-spacing:.12em;text-transform:uppercase;opacity:.45;align-self:flex-start;}
+.chart-wrap{width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px;}
+.bar-row{display:flex;flex-direction:column;gap:3px;}
+.bar-label{font-size:clamp(8px,1vw,10px);opacity:.55;display:flex;justify-content:space-between;}
+.bar-track{height:clamp(8px,1.2vw,12px);background:rgba(255,255,255,.06);border-radius:6px;overflow:hidden;position:relative;}
+.bar-fill-before{position:absolute;left:0;top:0;height:100%;border-radius:6px;transition:width 1.4s cubic-bezier(.4,0,.2,1);opacity:.35;}
+.bar-fill-after{position:absolute;left:0;top:0;height:100%;border-radius:6px;transition:width 1.6s cubic-bezier(.4,0,.2,1) .2s;}
+.bar-val{font-size:clamp(8px,.95vw,10px);opacity:.5;text-align:right;margin-top:1px;}
+/* bottom buttons */
+.finale-bottom{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:14px;padding:0 20px clamp(14px,2.5vh,24px);opacity:0;animation:fup .6s 1.2s both;pointer-events:all;}
+.fin-btn{font-family:‘Nunito’,sans-serif;font-size:clamp(11px,1.4vw,14px);font-weight:700;border-radius:30px;padding:clamp(8px,1.2vw,12px) clamp(18px,2.5vw,28px);cursor:pointer;border:none;transition:all .25s;letter-spacing:.05em;}
+.fin-btn-home{background:rgba(255,255,255,.1);color:rgba(255,255,255,.75);border:1.5px solid rgba(255,255,255,.2);}
+.fin-btn-home:hover{background:rgba(255,255,255,.18);color:#fff;transform:scale(1.05);}
+.fin-btn-replay{color:#fff;border:none;}
+.fin-btn-replay:hover{transform:scale(1.05);filter:brightness(1.15);}
+/* rebuild banner */
+.rebuild-banner{position:absolute;bottom:clamp(70px,10vh,100px);left:50%;transform:translateX(-50%);font-size:clamp(10px,1.4vw,14px);letter-spacing:.14em;text-transform:uppercase;opacity:0;transition:opacity .8s;white-space:nowrap;pointer-events:none;z-index:15;}
+.rebuild-banner.show{opacity:1;}
+</style>
+
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+     INDEX SCREEN
+════════════════════════════════════════════ -->
+
+<canvas id="cv-index" class="active"></canvas>
+
+<div id="s-index" class="screen active">
+  <div class="idx-page">
+    <div class="top-lbl">Progetto di Scienze — Sistema Nervoso</div>
+    <div class="main-title">
+      <h1>Il Cervello<br>e le Droghe</h1>
+      <p>come le sostanze psicoattive alterano il sistema nervoso centrale</p>
+    </div>
+    <div class="divider"></div>
+    <div class="cards">
+      <div class="card c1" onclick="openAnim('stim')">
+        <div class="icon">⚡</div>
+        <div class="c-cat">Categoria 01</div>
+        <h2>Droghe<br>Stimolanti</h2>
+        <p>Sovraccaricano il cervello di dopamina accelerando ogni funzione fino al limite.</p>
+        <div class="drug-tags"><span class="tag">Cocaina</span><span class="tag">Anfetamine</span><span class="tag">MDMA</span></div>
+        <div class="arr">→</div>
+      </div>
+      <div class="card c2" onclick="openAnim('dep')">
+        <div class="icon">🌙</div>
+        <div class="c-cat">Categoria 02</div>
+        <h2>Droghe<br>Depressive</h2>
+        <p>Silenziando i neuroni portano il cervello in uno stato di sonno artificiale.</p>
+        <div class="drug-tags"><span class="tag">Alcol</span><span class="tag">Oppioidi</span><span class="tag">Benzo</span></div>
+        <div class="arr">→</div>
+      </div>
+      <div class="card c3" onclick="openAnim('allu')">
+        <div class="icon">✦</div>
+        <div class="c-cat">Categoria 03</div>
+        <h2>Allucinogeni<br>Psicotropi</h2>
+        <p>Esplodono le connessioni cerebrali distorcendo la realtà fino alla dissoluzione del sé.</p>
+        <div class="drug-tags"><span class="tag">LSD</span><span class="tag">Psilocibina</span><span class="tag">DMT</span></div>
+        <div class="arr">→</div>
+      </div>
+    </div>
+    <div class="idx-footer"><p>clicca una categoria · ogni animazione ha 5 fasi + audio + legenda in tempo reale</p></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     ANIMATION SCREEN (shared, theme-swapped)
+════════════════════════════════════════════ -->
+
+<canvas id="cv-anim"></canvas>
+
+<div id="s-anim" class="screen">
+  <!-- cinematic intro overlay -->
+  <div class="intro-ov" id="introOv">
+    <div class="iv-lbl" id="ivLbl">Sistema Nervoso Centrale</div>
+    <div class="iv-big" id="ivBig">TITOLO</div>
+    <div class="iv-sub" id="ivSub">sub</div>
+    <div class="iv-line" id="ivLine"></div>
+    <div class="iv-skip" id="ivSkip">[ tocca o premi un tasto qualsiasi per iniziare ]</div>
+    <div class="iv-audio-hint">🔊 l'audio si attiverà automaticamente</div>
+  </div>
+  <!-- main anim UI -->
+  <div class="anim-wrap" id="animWrap" style="display:none">
+    <header>
+      <div class="h-tag" id="hTag">⚡</div>
+      <div class="h-title"><h1 id="hTitle">Titolo</h1><small id="hSub">sub</small></div>
+      <button class="back-btn" onclick="goIndex()">← Indice</button>
+    </header>
+    <div id="leg">
+      <div class="lb"><div class="ll" id="l1l">Lab1</div><div class="lv" id="l1v">—</div><div class="lbg"><div class="lbf" id="l1b" style="width:30%"></div></div></div>
+      <div class="lb"><div class="ll" id="l2l">Lab2</div><div class="lv" id="l2v">—</div><div class="lbg"><div class="lbf" id="l2b" style="width:30%"></div></div></div>
+      <div class="lb"><div class="ll" id="l3l">Lab3</div><div class="lv" id="l3v">—</div><div class="lbg"><div class="lbf" id="l3b" style="width:100%"></div></div></div>
+      <div class="lb"><div class="ll">Stato</div><div class="lstate" id="lSt">—</div></div>
+    </div>
+    <div id="tcard"><div class="ci" id="ci"><div class="cbadge" id="cbadge"></div><h2 id="ct"></h2><p id="cp"></p></div></div>
+    <div id="dots"></div>
+    <div class="hint">← → fasi · spazio = auto · ESC = torna all'indice</div>
+    <button id="abtn" onclick="toggleAuto()">▶ Auto</button>
+    <button id="sbtn" onclick="toggleSound()">🔊</button>
+    <button id="fsbtn" onclick="toggleFS()" title="Schermo intero">⛶</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     FINALE SCREEN
+════════════════════════════════════════════ -->
+
+<div id="s-finale" class="screen">
+  <canvas id="finale-canvas"></canvas>
+  <div class="finale-ui" id="finaleUI">
+    <div class="finale-top">
+      <div class="finale-eyebrow" id="fin-eyebrow">Riepilogo scientifico</div>
+      <div class="finale-headline" id="fin-headline">Analisi completata</div>
+      <div class="finale-sub" id="fin-sub">cosa è successo al tuo cervello</div>
+    </div>
+    <div class="finale-left">
+      <canvas id="brain3d-canvas" width="180" height="180"></canvas>
+      <div class="verdict-box">
+        <div class="verdict-label" id="verdict-label">Diagnosi neurologica</div>
+        <div id="verdict-text"><span id="vt-content"></span><span class="verdict-cursor" id="vcursor">|</span></div>
+      </div>
+    </div>
+    <div class="finale-right">
+      <div class="chart-title">Neurotrasmettitori: prima ⬜ vs dopo 🟦</div>
+      <div class="chart-wrap" id="chart-wrap"></div>
+    </div>
+    <div class="finale-bottom">
+      <button class="fin-btn fin-btn-home" onclick="goIndex()">🏠 Torna all'indice</button>
+      <button class="fin-btn fin-btn-replay" id="fin-replay-btn" onclick="replayAnim()">↺ Rivedi animazione</button>
+    </div>
+  </div>
+  <div class="rebuild-banner" id="rebuild-banner">🌱 il cervello inizia a guarire…</div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  AUDIO ENGINE
+// ══════════════════════════════════════════════
+const AC=window.AudioContext||window.webkitAudioContext;
+let ac=null,masterGain=null,soundOn=true,droneOsc=null,droneGain=null,droneLfo=null,droneLfoG=null;
+function initAudio(){
+  if(!ac){ac=new AC();masterGain=ac.createGain();masterGain.gain.value=0.28;masterGain.connect(ac.destination);}
+  // Resume if browser suspended it (autoplay policy)
+  if(ac.state==='suspended')ac.resume();
+}
+function stopDrone(){if(droneOsc){try{droneOsc.stop();}catch(e){}droneOsc=null;}if(droneGain){droneGain.disconnect();droneGain=null;}if(droneLfo){try{droneLfo.stop();}catch(e){}droneLfo=null;}if(droneLfoG){droneLfoG.disconnect();droneLfoG=null;}}
+function startDrone(freq,vol,lfoFreq=0){if(!ac)return;stopDrone();droneOsc=ac.createOscillator();droneGain=ac.createGain();droneOsc.type='sine';droneOsc.frequency.value=freq;droneGain.gain.value=soundOn?vol:0;if(lfoFreq>0){droneLfo=ac.createOscillator();droneLfoG=ac.createGain();droneLfo.frequency.value=lfoFreq;droneLfoG.gain.value=freq*0.14;droneLfo.connect(droneLfoG);droneLfoG.connect(droneOsc.frequency);droneLfo.start();}droneOsc.connect(droneGain);droneGain.connect(masterGain);droneOsc.start();}
+function playZap(){if(!ac||!soundOn)return;const o=ac.createOscillator(),g=ac.createGain();o.type='sawtooth';o.frequency.setValueAtTime(1100,ac.currentTime);o.frequency.exponentialRampToValueAtTime(160,ac.currentTime+0.1);g.gain.setValueAtTime(0.2,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.1);o.connect(g);g.connect(masterGain);o.start();o.stop(ac.currentTime+0.12);}
+function playDrop(){if(!ac||!soundOn)return;const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.setValueAtTime(420,ac.currentTime);o.frequency.exponentialRampToValueAtTime(210,ac.currentTime+0.6);g.gain.setValueAtTime(0.1,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.65);o.connect(g);g.connect(masterGain);o.start();o.stop(ac.currentTime+0.68);}
+function playShimmer(){if(!ac||!soundOn)return;const o=ac.createOscillator(),g=ac.createGain(),lf=ac.createOscillator(),lg=ac.createGain();lf.frequency.value=3+Math.random()*5;lg.gain.value=90;lf.connect(lg);lg.connect(o.frequency);o.type='sine';o.frequency.value=280+Math.random()*420;g.gain.setValueAtTime(0.09,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.75);o.connect(g);g.connect(masterGain);lf.start();o.start();o.stop(ac.currentTime+0.77);lf.stop(ac.currentTime+0.77);}
+function playTick(f=400){if(!ac||!soundOn)return;const o=ac.createOscillator(),g=ac.createGain();o.type='square';o.frequency.value=f;g.gain.setValueAtTime(0.07,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.025);o.connect(g);g.connect(masterGain);o.start();o.stop(ac.currentTime+0.03);}
+function toggleSound(){initAudio();soundOn=!soundOn;document.getElementById('sbtn').textContent=soundOn?'🔊':'🔇';document.getElementById('sbtn').classList.toggle('muted',!soundOn);if(droneGain)droneGain.gain.value=soundOn?currentDroneVol:0;}
+let currentDroneVol=0.05;
+
+// Fullscreen
+function toggleFS(){
+  if(!document.fullscreenElement){document.documentElement.requestFullscreen().catch(()=>{});}
+  else{document.exitFullscreen().catch(()=>{});}
+}
+document.addEventListener('fullscreenchange',()=>{
+  const btn=document.getElementById('fsbtn');
+  if(btn)btn.textContent=document.fullscreenElement?'✕':'⛶';
+});
+
+// ══════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════
+let currentAnim=null;
+function openAnim(type){
+  initAudio(); // unlock audio context on user click
+  currentAnim=type;
+  document.getElementById('s-index').classList.remove('active');
+  document.getElementById('cv-index').classList.remove('active');
+  document.getElementById('s-anim').classList.add('active');
+  document.getElementById('cv-anim').classList.add('active');
+  stopAllAnimLoops();
+  setupTheme(type);
+  showIntro(type);
+}
+function goIndex(){
+  stopAllAnimLoops();stopDrone();stopAuto();
+  if(brain3DRaf){cancelAnimationFrame(brain3DRaf);brain3DRaf=null;}
+  if(finaleRaf){cancelAnimationFrame(finaleRaf);finaleRaf=null;}
+  document.getElementById('rebuild-banner').classList.remove('show');
+  document.getElementById('s-finale').classList.remove('active');
+  document.getElementById('s-anim').classList.remove('active');
+  document.getElementById('cv-anim').classList.remove('active');
+  document.getElementById('s-index').classList.add('active');
+  document.getElementById('cv-index').classList.add('active');
+  currentAnim=null;
+  startIndexLoop();
+}
+
+// ══════════════════════════════════════════════
+//  THEME CONFIG
+// ══════════════════════════════════════════════
+const THEMES={
+  stim:{cls:'th-stim',tag:'⚡ Stimolanti',h1:'Droghe Stimolanti & S.N.C.',sub:'cocaina · anfetamine · MDMA',ibig:'STIMOLANTI',isub:'cocaina · anfetamine · MDMA',l1l:'Dopamina',l2l:'Noradrenalina',l3l:'Neuroni attivi'},
+  dep:{cls:'th-dep',tag:'🌙 Depressivi',h1:'Droghe Depressive & S.N.C.',sub:'alcol · oppioidi · benzodiazepine',ibig:'DEPRESSIVI',isub:'alcol · oppioidi · benzodiazepine',l1l:'GABA (inibitore)',l2l:'Attività neuronale',l3l:'Frequenza segnali'},
+  allu:{cls:'th-allu',tag:'✦ Psicotropi',h1:'Allucinogeni & S.N.C.',sub:'LSD · psilocibina · DMT',ibig:'ALLUCINOGENI',isub:'LSD · psilocibina · DMT · ketamina',l1l:'Serotonina 5-HT2A',l2l:'Connessioni attive',l3l:'Distorsione realtà'},
+};
+let lastThemeCls='';
+function setupTheme(type){
+  const th=THEMES[type];
+  const body=document.body;
+  if(lastThemeCls)body.classList.remove(lastThemeCls);
+  body.classList.add(th.cls);lastThemeCls=th.cls;
+  document.getElementById('hTag').textContent=th.tag;
+  document.getElementById('hTitle').textContent=th.h1;
+  document.getElementById('hSub').textContent=th.sub;
+  document.getElementById('ivBig').textContent=th.ibig;
+  document.getElementById('ivSub').textContent=th.isub;
+  document.getElementById('l1l').textContent=th.l1l;
+  document.getElementById('l2l').textContent=th.l2l;
+  document.getElementById('l3l').textContent=th.l3l;
+}
+
+// ══════════════════════════════════════════════
+//  INTRO
+// ══════════════════════════════════════════════
+let introGone=false;
+function showIntro(type){
+  introGone=false;
+  const ov=document.getElementById('introOv');
+  document.getElementById('animWrap').style.display='none';
+  ov.classList.remove('gone');ov.style.display='flex';
+  document.getElementById('ivSkip').onclick=dismissIntro;
+  // dismiss on ANY click or keypress on the overlay
+  ov.addEventListener('click',dismissIntro,{once:true});
+  if(_introKeyHandler)document.removeEventListener('keydown',_introKeyHandler);
+  _introKeyHandler=()=>dismissIntro();
+  document.addEventListener('keydown',_introKeyHandler,{once:true});
+  clearTimeout(_introTimer);
+  _introTimer=setTimeout(dismissIntro,4800);
+}
+let _introKeyHandler=null,_introTimer=null;
+function dismissIntro(){
+  if(introGone)return;introGone=true;
+  clearTimeout(_introTimer);
+  if(_introKeyHandler){document.removeEventListener('keydown',_introKeyHandler);_introKeyHandler=null;}
+  initAudio(); // crucial: resume AudioContext right here on user gesture
+  const ov=document.getElementById('introOv');
+  ov.classList.add('gone');
+  setTimeout(()=>{ov.style.display='none';document.getElementById('animWrap').style.display='block';},950);
+  if(currentAnim==='stim')playZap();
+  else if(currentAnim==='dep')playDrop();
+  else playShimmer();
+  startCurrentAnim();
+}
+
+// ══════════════════════════════════════════════
+//  PHASE DATA
+// ══════════════════════════════════════════════
+const PHASES={
+  stim:[
+    {l:'Fase 1',ti:'Il S.N.C. a riposo ⚡',tx:'I <b>neuroni</b> trasmettono segnali a velocità normale. La <b>dopamina</b> e la <b>noradrenalina</b> vengono rilasciate in quantità equilibrate, tenendo corpo e mente in uno stato di veglia sana.',sp:1,fr:.012,bc:0,ov:0,v1:'100%',w1:'30%',c1:'#ffcc00',v2:'100%',w2:'30%',c2:'#ff8c00',v3:'100%',w3:'100%',st:'⚖️ Equilibrio',df:[55,.03,0]},
+    {l:'Fase 2',ti:'La molecola blocca i trasportatori 💊',tx:'La sostanza stimolante si lega ai <b>trasportatori della dopamina (DAT)</b>, bloccandone il riassorbimento. La dopamina resta intrappolata nella sinapsi e continua a stimolare il neurone.',sp:1.7,fr:.026,bc:3,ov:.2,v1:'200%',w1:'60%',c1:'#ffcc00',v2:'170%',w2:'51%',c2:'#ff8c00',v3:'97%',w3:'97%',st:'⚠️ Alterazione',df:[75,.06,0]},
+    {l:'Fase 3',ti:'Scarica elettrica! ⚡⚡',tx:'Dopamina e noradrenalina schizzano fino a <b>10× il normale</b>. Cuore accelerato, pressione alta, euforia intensa. Il cervello è <b>in sovraccarico totale</b>.',sp:3.5,fr:.068,bc:10,ov:.75,v1:'1000%',w1:'100%',c1:'#ff4500',v2:'800%',w2:'100%',c2:'#ff4500',v3:'80%',w3:'80%',st:'🔥 Picco tossico',df:[105,.12,0]},
+    {l:'Fase 4',ti:'Il crash chimico 💥',tx:'Le riserve esaurite fanno crollare la dopamina <b>sotto il normale</b>. Arriva il crash: depressione, stanchezza estrema, ansia. Il cervello ha bruciato le sue scorte.',sp:.35,fr:.004,bc:0,ov:.88,v1:'9%',w1:'3%',c1:'#772200',v2:'12%',w2:'4%',c2:'#772200',v3:'63%',w3:'63%',st:'💀 Crash — Carenza acuta',df:[45,.07,0]},
+    {l:'Fase 5',ti:'Neuroni bruciati ☠️',tx:'L\'abuso cronico causa <b>neurotossicità</b>. La corteccia prefrontale si assottiglia. Si perde la capacità di provare piacere naturale: <b>anedonia permanente</b>.',sp:.14,fr:.001,bc:0,ov:1,v1:'6%',w1:'2%',c1:'#440f00',v2:'8%',w2:'2%',c2:'#440f00',v3:'36%',w3:'36%',st:'☠️ Neurotossicità cronica',df:[25,.04,0]},
+  ],
+  dep:[
+    {l:'Fase 1',ti:'Il S.N.C. in equilibrio 🌙',tx:'Il sistema nervoso mantiene un equilibrio tra <b>eccitazione</b> e <b>inibizione</b>. Il neurotrasmettitore <b>GABA</b> rallenta l\'attività quando necessario, il glutammato la stimola. Tutto scorre fluido.',sl:1,fog:.0,fade:.0,dr:false,v1:'100%',w1:'30%',c1:'#8ab4f8',v2:'100%',w2:'100%',c2:'#4ecdc4',v3:'Normale',w3:'100%',c3:'#74d7cb',st:'⚖️ Equilibrio',df:[48,.03,0]},
+    {l:'Fase 2',ti:'Il GABA viene potenziato 💧',tx:'Alcol e benzodiazepine <b>potenziano il GABA</b>, il principale inibitore cerebrale. I neuroni ricevono segnali di "stop" molto più forti. Comunicazione più lenta, riflessi attutiti.',sl:.44,fog:.26,fade:.16,dr:true,v1:'280%',w1:'84%',c1:'#8ab4f8',v2:'72%',w2:'72%',c2:'#8ab4f8',v3:'Lenta',w3:'55%',c3:'#8ab4f8',st:'⚠️ Rallentamento',df:[40,.055,0]},
+    {l:'Fase 3',ti:'Il cervello si addormenta 😶',tx:'La <b>corteccia cerebrale si silenzia</b>. I riflessi rallentano, la memoria a breve termine si compromette. L\'utente sente disinibizione, ma il cervello sta <b>perdendo il controllo</b>.',sl:.17,fog:.56,fade:.43,dr:true,v1:'450%',w1:'100%',c1:'#6080cc',v2:'46%',w2:'46%',c2:'#5566aa',v3:'Molto lenta',w3:'27%',c3:'#5566aa',st:'😶 Sedazione profonda',df:[32,.09,0]},
+    {l:'Fase 4',ti:'Il corpo non sa fermarsi 🫧',tx:'Il cervello riduce i recettori GABA propri. Interrompere può causare <b>crisi epilettiche</b>. Il corpo <b>non funziona senza</b> la sostanza.',sl:.07,fog:.74,fade:.68,dr:false,v1:'120%',w1:'36%',c1:'#4455aa',v2:'26%',w2:'26%',c2:'#334499',v3:'Quasi assente',w3:'10%',c3:'#334499',st:'💉 Dipendenza fisica',df:[22,.1,0]},
+    {l:'Fase 5',ti:'Silenzio neuronale ☁️',tx:'L\'abuso cronico causa <b>perdita di materia bianca</b> e danni all\'ippocampo. Con gli oppioidi si aggiunge la <b>depressione respiratoria</b>: il cervello dimentica di mandare il segnale di respirare.',sl:.02,fog:.93,fade:.91,dr:false,v1:'60%',w1:'18%',c1:'#223388',v2:'10%',w2:'10%',c2:'#223388',v3:'Critica',w3:'4%',c3:'#223388',st:'☁️ Silenzio neuronale',df:[15,.11,0]},
+  ],
+  allu:[
+    {l:'Fase 1',ti:'Connessioni neurali ordinate ✦',tx:'Il cervello elabora la realtà attraverso <b>vie neurali ben definite</b>. La serotonina (recettori <b>5-HT2A</b>) regola umore, percezione e pensiero. Le informazioni seguono percorsi prevedibili.',ch:.0,el:.0,hs:.0,mp:.0,mol:false,v1:'100%',w1:'30%',c1:'#c084fc',v2:'Normale',w2:'18%',c2:'#38bdf8',v3:'0%',w3:'0%',c3:'#ff6ec7',st:'⚖️ Equilibrio',df:[65,.03,.1]},
+    {l:'Fase 2',ti:'Si lega ai recettori 5-HT2A 🌀',tx:'Gli allucinogeni si legano ai <b>recettori 5-HT2A</b> nella corteccia. Non li distruggono: li <b>sovrastimolano</b>, aprendo canali di comunicazione normalmente silenziosi.',ch:.22,el:5,hs:.3,mp:.1,mol:true,v1:'340%',w1:'100%',c1:'#c084fc',v2:'Aumentata',w2:'40%',c2:'#38bdf8',v3:'15%',w3:'15%',c3:'#ff6ec7',st:'🌀 Attivazione',df:[80,.06,.3]},
+    {l:'Fase 3',ti:'Il cervello si ricabla ⚡🌈',tx:'Enorme <b>iperconnettività</b>: aree che non comunicano iniziano a scambiarsi segnali. Rete visiva e sistema emotivo si intrecciano — nascono <b>sinestesie</b> e allucinazioni.',ch:.58,el:20,hs:1.1,mp:.42,mol:true,v1:'280%',w1:'84%',c1:'#a855f7',v2:'+1200%',w2:'100%',c2:'#ff6ec7',v3:'65%',w3:'65%',c3:'#ff4ece',st:'🌈 Iperconnettività',df:[100,.1,.8]},
+    {l:'Fase 4',ti:'I confini svaniscono 🌊',tx:'La <b>Default Mode Network</b> si disorganizza. L\'utente sperimenta la "dissoluzione dell\'ego": perde il confine tra sé e il mondo. Può essere pace assoluta o <b>bad trip</b> terrificante.',ch:.85,el:32,hs:2.2,mp:.78,mol:true,v1:'180%',w1:'54%',c1:'#9333ea',v2:'Caotica',w2:'100%',c2:'#f472b6',v3:'95%',w3:'95%',c3:'#ec4899',st:'🌊 Dissoluzione Ego',df:[120,.13,1.5]},
+    {l:'Fase 5',ti:'Neuroplasticità o disturbi? 🔮',tx:'Gli allucinogeni classici non creano dipendenza fisica. Studi recenti mostrano <b>benefici terapeutici</b> per ansia e PTSD. Ma esistono rischi: <b>HPPD</b> (flashback visivi) e psicosi latente nei soggetti vulnerabili.',ch:.28,el:8,hs:.55,mp:.18,mol:false,v1:'110%',w1:'33%',c1:'#c084fc',v2:'In recupero',w2:'35%',c2:'#38bdf8',v3:'20%',w3:'20%',c3:'#ff6ec7',st:'🔮 Recupero / Rischi',df:[85,.07,.5]},
+  ],
+};
+
+// ══════════════════════════════════════════════
+//  PHASE SYSTEM
+// ══════════════════════════════════════════════
+let curPh=0,autoInt=null;
+function setupDots(type){
+  const wrap=document.getElementById('dots');wrap.innerHTML='';
+  PHASES[type].forEach((p,i)=>{
+    const d=document.createElement('div');d.className='dot';d.textContent=i+1;
+    d.onclick=()=>{stopAuto();setPhase(i);};wrap.appendChild(d);
+  });
+}
+function updateDots(i){document.querySelectorAll('.dot').forEach((d,k)=>{d.className='dot';if(k===i)d.classList.add('active');else if(k<i)d.classList.add('done');});}
+function updCard(p,isLast){
+  const ci=document.getElementById('ci');ci.classList.remove('show');
+  setTimeout(()=>{
+    document.getElementById('cbadge').textContent=p.l;
+    document.getElementById('ct').textContent=p.ti;
+    document.getElementById('cp').innerHTML=p.tx+(isLast?` <br><br><span onclick="openFinale()" style="cursor:pointer;font-size:11px;opacity:.7;text-decoration:underline;font-weight:700">→ Vedi riepilogo finale</span>`:'');
+    ci.classList.add('show');
+  },130);
+}
+function updLeg(p){['l1v','l2v','l3v'].forEach((id,i)=>{const v=['v1','v2','v3'][i],w=['w1','w2','w3'][i],c=['c1','c2','c3'][i];const el=document.getElementById(id);if(el){el.textContent=p[v]||'—';el.style.color=p[c]||'#fff';const b=document.getElementById(['l1b','l2b','l3b'][i]);if(b){b.style.width=p[w]||'0%';b.style.background=p[c]||'#fff';}}});document.getElementById('lSt').textContent=p.st||'—';}
+function setPhase(i){
+  const ph=PHASES[currentAnim];if(!ph||i<0||i>=ph.length)return;
+  curPh=i;const p=ph[i];
+  const isLast=i===ph.length-1;
+  if(currentAnim==='stim'){A_stim_setPhase(p);}
+  else if(currentAnim==='dep'){A_dep_setPhase(p);}
+  else if(currentAnim==='allu'){A_allu_setPhase(p);}
+  updCard(p,isLast);updLeg(p);updateDots(i);
+  if(p.df&&ac){currentDroneVol=p.df[1];startDrone(p.df[0],p.df[1],p.df[2]||0);}
+}
+function toggleAuto(){autoInt?stopAuto():startAuto();}
+function stopAuto(){clearInterval(autoInt);autoInt=null;const b=document.getElementById('abtn');if(b){b.textContent='▶ Auto';b.classList.remove('pl');}}
+document.addEventListener('keydown',e=>{
+  // if finale screen is open
+  if(document.getElementById('s-finale').classList.contains('active')){
+    if(e.key==='Escape')goIndex();
+    return;
+  }
+  if(!currentAnim){return;}
+  if(!introGone){dismissIntro();return;}
+  if(e.key==='Escape'){stopAuto();goIndex();return;}
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'){stopAuto();setPhase(curPh+1);}
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp'){stopAuto();setPhase(curPh-1);}
+  if(e.key===' '){e.preventDefault();toggleAuto();}
+});
+let _tx0=0;
+document.addEventListener('touchstart',e=>{if(currentAnim&&!introGone)_tx0=e.touches[0].clientX;},{passive:true});
+document.addEventListener('touchend',e=>{if(!currentAnim||!introGone)return;const dx=e.changedTouches[0].clientX-_tx0;if(Math.abs(dx)>45){stopAuto();setPhase(curPh+(dx<0?1:-1));}},{passive:true});
+
+// ══════════════════════════════════════════════
+//  CANVAS & LOOP MANAGEMENT
+// ══════════════════════════════════════════════
+const cvIdx=document.getElementById('cv-index'),ctxI=cvIdx.getContext('2d');
+const cvAnim=document.getElementById('cv-anim'),ctxA=cvAnim.getContext('2d');
+let W=innerWidth,H=innerHeight,CX=W/2,CY=H/2;
+let rafIdx=null,rafAnim=null,animLoopFn=null;
+function resizeAll(){W=innerWidth;H=innerHeight;CX=W/2;CY=H/2;cvIdx.width=W;cvIdx.height=H;cvAnim.width=W;cvAnim.height=H;buildAnimScene();}
+window.addEventListener('resize',resizeAll);
+
+function stopAllAnimLoops(){if(rafAnim){cancelAnimationFrame(rafAnim);rafAnim=null;}animLoopFn=null;}
+function startCurrentAnim(){
+  setupDots(currentAnim);curPh=0;
+  buildAnimScene();
+  const ph=PHASES[currentAnim];
+  if(ph&&ph[0]&&ph[0].df&&ac){currentDroneVol=ph[0].df[1];startDrone(ph[0].df[0],ph[0].df[1],ph[0].df[2]||0);}
+  setPhase(0);
+  stopAllAnimLoops();
+  animLoopFn=currentAnim==='stim'?loopStim:currentAnim==='dep'?loopDep:loopAllu;
+  function run(){rafAnim=requestAnimationFrame(run);animLoopFn();}
+  run();
+}
+
+// ══════════════════════════════════════════════
+//  INDEX CANVAS
+// ══════════════════════════════════════════════
+let idxNodes=[],idxLinks=[],idxT=0;
+function buildIndex(){idxNodes=[];idxLinks=[];const N=55;for(let i=0;i<N;i++){idxNodes.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35,r:1.5+Math.random()*2.5,hue:Math.floor(Math.random()*3)*120+(Math.random()*40-20),ph:Math.random()*Math.PI*2,sp:.012+Math.random()*.02});}for(let i=0;i<N;i++)for(let j=i+1;j<N;j++){const dx=idxNodes[i].x-idxNodes[j].x,dy=idxNodes[i].y-idxNodes[j].y;if(Math.sqrt(dx*dx+dy*dy)<Math.min(W,H)*.22&&Math.random()>.62)idxLinks.push({a:i,b:j,t:Math.random(),sp:.002+Math.random()*.003});}}
+function drawIndex(){ctxI.clearRect(0,0,W,H);const g=ctxI.createRadialGradient(CX,CY,0,CX,CY,Math.max(W,H)*.75);g.addColorStop(0,'#100c1e');g.addColorStop(.5,'#0c081a');g.addColorStop(1,'#070410');ctxI.fillStyle=g;ctxI.fillRect(0,0,W,H);idxLinks.forEach(l=>{const nA=idxNodes[l.a],nB=idxNodes[l.b];const dx=nA.x-nB.x,dy=nA.y-nB.y,d=Math.sqrt(dx*dx+dy*dy);const mD=Math.min(W,H)*.22;const al=(1-d/mD)*.1;if(al<.01)return;ctxI.strokeStyle=`hsla(${nA.hue},60%,60%,${al})`;ctxI.lineWidth=.7;ctxI.beginPath();ctxI.moveTo(nA.x,nA.y);ctxI.lineTo(nB.x,nB.y);ctxI.stroke();const px=nA.x+(nB.x-nA.x)*l.t,py=nA.y+(nB.y-nA.y)*l.t;ctxI.shadowBlur=6;ctxI.shadowColor=`hsla(${nA.hue},80%,65%,.5)`;ctxI.beginPath();ctxI.arc(px,py,1.8,0,Math.PI*2);ctxI.fillStyle=`hsla(${nA.hue},80%,70%,${al*3})`;ctxI.fill();ctxI.shadowBlur=0;});idxNodes.forEach(n=>{const sc=1+.2*Math.sin(n.ph),nr=n.r*sc;ctxI.shadowBlur=8;ctxI.shadowColor=`hsla(${n.hue},80%,60%,.38)`;ctxI.beginPath();ctxI.arc(n.x,n.y,nr,0,Math.PI*2);ctxI.fillStyle=`hsla(${n.hue},75%,65%,.52)`;ctxI.fill();ctxI.shadowBlur=0;});}
+function updateIndex(){idxT+=.012;idxNodes.forEach(n=>{n.x+=n.vx;n.y+=n.vy;n.ph+=n.sp;if(n.x<-20)n.x=W+20;if(n.x>W+20)n.x=-20;if(n.y<-20)n.y=H+20;if(n.y>H+20)n.y=-20;});idxLinks.forEach(l=>l.t=(l.t+l.sp)%1);}
+function startIndexLoop(){if(rafIdx){cancelAnimationFrame(rafIdx);rafIdx=null;}function run(){rafIdx=requestAnimationFrame(run);if(!currentAnim){updateIndex();drawIndex();}}run();}
+
+// ══════════════════════════════════════════════
+//  SHARED BRAIN POINTS
+// ══════════════════════════════════════════════
+function makeBrainPts(morphAmt=0,morphT=0){const r=Math.min(W,H)*.22,pts=[];const bmp=[1,1.18,.88,1.12,1.06,.85,1.03,.96,1];for(let i=0;i<120;i++){const tt=i/120,ang=tt*Math.PI*2-Math.PI/2;const bi=tt*(bmp.length-1),bi0=Math.floor(bi),bf=bi-bi0;const bv=bmp[bi0]*(1-bf)+(bmp[Math.min(bi0+1,bmp.length-1)])*bf;const m=morphAmt*(Math.sin(morphT*1.2+tt*8)*.18+Math.cos(morphT*.8+tt*5)*.12);pts.push([CX+Math.cos(ang)*r*1.12*(bv+m),CY+Math.sin(ang)*r*.76*(bv+m*.7)-r*.06]);}return pts;}
+function drawBrainBase(pts,fillGrad,strokeCol,strokeW,glowCol,folds){ctxA.save();ctxA.translate(3,8);ctxA.beginPath();ctxA.moveTo(pts[0][0],pts[0][1]);pts.forEach(p=>ctxA.lineTo(p[0],p[1]));ctxA.closePath();ctxA.fillStyle=glowCol;ctxA.filter='blur(18px)';ctxA.fill();ctxA.filter='none';ctxA.restore();ctxA.beginPath();ctxA.moveTo(pts[0][0],pts[0][1]);pts.forEach(p=>ctxA.lineTo(p[0],p[1]));ctxA.closePath();ctxA.fillStyle=fillGrad;ctxA.fill();ctxA.strokeStyle=strokeCol;ctxA.lineWidth=strokeW;ctxA.lineJoin='round';ctxA.stroke();const s=Math.min(W,H);folds.forEach(f=>{ctxA.strokeStyle=f[6]||strokeCol;ctxA.lineWidth=1.3;ctxA.beginPath();ctxA.moveTo(f[0],f[1]);ctxA.quadraticCurveTo(f[2],f[3],f[4],f[5]);ctxA.stroke();});}
+function L(a,b,t){return a+(b-a)*Math.min(1,Math.max(0,t));}
+function hsl(h,s,l,a=1){return `hsla(${h%360},${s}%,${l}%,${a})`;}
+
+// ══════════════════════════════════════════════
+//  STIMOLANTI ENGINE
+// ══════════════════════════════════════════════
+let sNeus=[],sSyns=[],sBolts=[],sParts=[],sSparks=[];
+let sCurSp=1,sCurFr=.01,sCurOv=0,sTgtSp=1,sTgtFr=.01,sTgtOv=0;
+let sT=0,sTick=0;
+function buildStim(){sNeus=[];sSyns=[];const r=Math.min(W,H)*.2;for(let i=0;i<32;i++){const a=Math.random()*Math.PI*2,d=r*(.08+.92*Math.sqrt(Math.random()));sNeus.push({x:CX+Math.cos(a)*d*1.12,y:CY+Math.sin(a)*d*.76-r*.05,bx:CX+Math.cos(a)*d*1.12,by:CY+Math.sin(a)*d*.76-r*.05,r:3.5+Math.random()*4,ph:Math.random()*Math.PI*2,sp:.02+Math.random()*.025,fi:0,dead:false,da:1,wb:0});}for(let i=0;i<sNeus.length;i++)for(let j=i+1;j<sNeus.length;j++){const dx=sNeus[i].bx-sNeus[j].bx,dy=sNeus[i].by-sNeus[j].by;if(Math.sqrt(dx*dx+dy*dy)<r*1.2&&Math.random()>.52)sSyns.push({a:i,b:j,t:Math.random(),sp:.004+Math.random()*.005});}}
+function spawnBolt(){if(sNeus.length<2)return;const a=sNeus[Math.floor(Math.random()*sNeus.length)],b=sNeus[Math.floor(Math.random()*sNeus.length)];if(a===b)return;const segs=[[a.x,a.y]];for(let i=1;i<5+Math.floor(Math.random()*4);i++){const t=i/6;segs.push([a.x+(b.x-a.x)*t+(Math.random()-.5)*28,a.y+(b.y-a.y)*t+(Math.random()-.5)*28]);}segs.push([b.x,b.y]);sBolts.push({segs,life:1});a.fi=1;b.fi=Math.min(1,b.fi+.5);for(let i=0;i<5;i++)sSparks.push({x:b.x,y:b.y,vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5,life:1});playZap();}
+function A_stim_setPhase(p){sTgtSp=p.sp;sTgtFr=p.fr;sTgtOv=p.ov;for(let k=0;k<p.bc;k++)setTimeout(spawnBolt,k*130);}
+function updateStim(){sT+=.016;sTick+=.016;sCurSp+=(sTgtSp-sCurSp)*.02;sCurFr+=(sTgtFr-sCurFr)*.02;sCurOv+=(sTgtOv-sCurOv)*.015;if(Math.random()<sCurFr)spawnBolt();if(sCurSp>1.5&&sTick>.07/sCurSp){sTick=0;playTick(280+Math.random()*200);}if(curPh>0&&Math.random()<.04)sParts.push({x:Math.random()<.5?-10:W+10,y:Math.random()*H,tx:CX+(Math.random()-.5)*Math.min(W,H)*.3,ty:CY+(Math.random()-.5)*Math.min(W,H)*.22,sp:1.2+Math.random()*1.5,r:5+Math.random()*4,life:1,col:['#ffcc00','#ff6600','#ff4500'][Math.floor(Math.random()*3)]});sNeus.forEach((n,i)=>{n.ph+=n.sp*sCurSp*(n.fi>0?1.8:1);n.fi=Math.max(0,n.fi-.025);if(n.wb>0){n.wb*=.9;n.x=n.bx+(Math.random()-.5)*n.wb;n.y=n.by+(Math.random()-.5)*n.wb;}else{n.x+=(n.bx-n.x)*.15;n.y+=(n.by-n.y)*.15;}n.dead=sCurOv>(1-i/sNeus.length)*.92;n.da=n.dead?Math.max(.07,n.da-.004):Math.min(1,n.da+.012);});sSyns.forEach(s=>{if(!sNeus[s.a].dead&&!sNeus[s.b].dead)s.t=(s.t+s.sp*sCurSp)%1;});sBolts.forEach(b=>b.life-=.06);sBolts=sBolts.filter(b=>b.life>0);sParts.forEach(p=>{if(!p.att){const dx=p.tx-p.x,dy=p.ty-p.y,d=Math.sqrt(dx*dx+dy*dy);if(d<6){p.att=true;for(let i=0;i<7;i++)sSparks.push({x:p.tx,y:p.ty,vx:(Math.random()-.5)*6,vy:(Math.random()-.5)*6,life:1,col:p.col});}else{p.x+=dx/d*p.sp;p.y+=dy/d*p.sp;}}else p.life-=.009;});sParts=sParts.filter(p=>p.life>0);sSparks.forEach(s=>{s.x+=s.vx;s.y+=s.vy;s.vx*=.9;s.vy*=.9;s.life-=.04;});sSparks=sSparks.filter(s=>s.life>0);}
+function drawStim(){ctxA.clearRect(0,0,W,H);const bg=ctxA.createRadialGradient(CX,CY,0,CX,CY,Math.max(W,H)*.75);bg.addColorStop(0,'rgba(18,14,5,1)');bg.addColorStop(.5,'rgba(10,8,2,1)');bg.addColorStop(1,'rgba(5,5,10,1)');ctxA.fillStyle=bg;ctxA.fillRect(0,0,W,H);if(sCurOv>.3){const v=ctxA.createRadialGradient(CX,CY,0,CX,CY,Math.max(W,H)*.7);v.addColorStop(0,'transparent');v.addColorStop(1,`rgba(255,80,0,${sCurOv*.17})`);ctxA.fillStyle=v;ctxA.fillRect(0,0,W,H);}const pts=makeBrainPts();const lo=sCurOv;const g=ctxA.createRadialGradient(CX,CY,0,CX,CY,Math.min(W,H)*.22*1.2);g.addColorStop(0,`rgb(${L(40,82,lo)|0},${L(28,20,lo)|0},${L(10,5,lo)|0})`);g.addColorStop(1,`rgb(${L(22,52,lo)|0},${L(15,10,lo)|0},${L(5,3,lo)|0})`);const sc=Math.min(W,H);const folds=[[CX-sc*.12,CY-sc*.055,CX-sc*.07,CY-sc*.125,CX-sc*.01,CY-sc*.075,`rgba(${L(120,200,lo)|0},${L(80,60,lo)|0},0,${.2+lo*.22})`],[CX+sc*.02,CY-sc*.065,CX+sc*.075,CY-sc*.12,CX+sc*.13,CY-sc*.048,`rgba(${L(120,200,lo)|0},${L(80,60,lo)|0},0,${.2+lo*.22})`],[CX-sc*.08,CY+sc*.015,CX,CY+sc*.065,CX+sc*.07,CY+sc*.02,`rgba(${L(120,200,lo)|0},${L(80,60,lo)|0},0,${.2+lo*.22})`]];ctxA.shadowBlur=lo>.2?12+lo*18:0;ctxA.shadowColor=`rgba(255,${L(150,50,lo)|0},0,.65)`;drawBrainBase(pts,g,`rgba(${L(200,255,lo)|0},${L(150,80,lo)|0},0,${.47+lo*.38})`,2.5+lo*2,`rgba(255,100,0,${.07+lo*.1})`,folds);ctxA.shadowBlur=0;sSyns.forEach(s=>{const nA=sNeus[s.a],nB=sNeus[s.b];const al=Math.min(nA.da,nB.da)*.37;ctxA.strokeStyle=`rgba(255,180,0,${al*.36})`;ctxA.lineWidth=.8;ctxA.beginPath();ctxA.moveTo(nA.x,nA.y);ctxA.lineTo(nB.x,nB.y);ctxA.stroke();if(nA.dead||nB.dead)return;const px=nA.x+(nB.x-nA.x)*s.t,py=nA.y+(nB.y-nA.y)*s.t;ctxA.shadowBlur=9;ctxA.shadowColor='#ffcc00';ctxA.beginPath();ctxA.arc(px,py,2.4,0,Math.PI*2);ctxA.fillStyle='#ffcc00';ctxA.fill();ctxA.shadowBlur=0;});sBolts.forEach(b=>{if(b.segs.length<2)return;ctxA.globalAlpha=b.life*.88;ctxA.shadowBlur=8+10*b.life;ctxA.shadowColor='#ffcc00';ctxA.strokeStyle=`rgba(255,220,0,${b.life})`;ctxA.lineWidth=1.5*b.life;ctxA.beginPath();ctxA.moveTo(b.segs[0][0],b.segs[0][1]);b.segs.forEach(p=>ctxA.lineTo(p[0],p[1]));ctxA.stroke();ctxA.shadowBlur=0;ctxA.globalAlpha=1;});sParts.forEach(p=>{ctxA.globalAlpha=p.life*.87;ctxA.shadowBlur=12;ctxA.shadowColor=p.col;ctxA.beginPath();ctxA.arc(p.x,p.y,p.r,0,Math.PI*2);ctxA.fillStyle=p.col;ctxA.fill();ctxA.shadowBlur=0;ctxA.globalAlpha=1;});sSparks.forEach(s=>{ctxA.globalAlpha=s.life;ctxA.beginPath();ctxA.arc(s.x,s.y,2*s.life,0,Math.PI*2);ctxA.fillStyle=s.col||'#ffcc00';ctxA.fill();ctxA.globalAlpha=1;});sNeus.forEach(n=>{const sc2=1+.14*Math.sin(n.ph)+(n.fi*.3),nr=n.r*sc2,a=n.da;const col=n.fi>.3?`rgba(255,220,50,${a})`:`rgba(255,160,0,${a})`;ctxA.shadowBlur=n.dead?0:8+n.fi*19;ctxA.shadowColor=n.fi>.3?'rgba(255,220,0,.88)':'rgba(255,130,0,.48)';ctxA.beginPath();ctxA.arc(n.x,n.y,nr,0,Math.PI*2);ctxA.fillStyle=col;ctxA.fill();ctxA.shadowBlur=0;if(n.dead&&a>.08){ctxA.strokeStyle=`rgba(100,50,0,${a*.52})`;ctxA.lineWidth=1.2;ctxA.beginPath();ctxA.moveTo(n.x-nr,n.y-nr);ctxA.lineTo(n.x+nr,n.y+nr);ctxA.moveTo(n.x+nr,n.y-nr);ctxA.lineTo(n.x-nr,n.y+nr);ctxA.stroke();}});}
+function loopStim(){updateStim();drawStim();}
+
+// ══════════════════════════════════════════════
+//  DEPRESSIVI ENGINE
+// ══════════════════════════════════════════════
+let dNeus=[],dSyns=[],dDrops=[],dFog=[];
+let dCurSl=1,dCurFog=0,dCurFd=0,dTgtSl=1,dTgtFog=0,dTgtFd=0;
+let dT=0,dDropT=0;
+function buildDep(){dNeus=[];dSyns=[];const r=Math.min(W,H)*.2;for(let i=0;i<30;i++){const a=Math.random()*Math.PI*2,d=r*(.08+.92*Math.sqrt(Math.random()));const bx=CX+Math.cos(a)*d*1.12,by=CY+Math.sin(a)*d*.76-r*.05;dNeus.push({x:bx,y:by,bx,by,r:4+Math.random()*4,ph:Math.random()*Math.PI*2,sp:.015+Math.random()*.018,da:1,fade:0,ws:Math.random()*100});}for(let i=0;i<dNeus.length;i++)for(let j=i+1;j<dNeus.length;j++){const dx=dNeus[i].bx-dNeus[j].bx,dy=dNeus[i].by-dNeus[j].by;if(Math.sqrt(dx*dx+dy*dy)<r*1.18&&Math.random()>.5)dSyns.push({a:i,b:j,t:Math.random(),sp:.003+Math.random()*.004});}}
+function A_dep_setPhase(p){dTgtSl=p.sl;dTgtFog=p.fog;dTgtFd=p.fade;}
+function updateDep(){dT+=.016;dDropT+=.016;dCurSl+=(dTgtSl-dCurSl)*.012;dCurFog+=(dTgtFog-dCurFog)*.01;dCurFd+=(dTgtFd-dCurFd)*.01;if(dCurFog>.1&&Math.random()<dCurFog*.12)dFog.push({x:Math.random()*W,y:Math.random()*H,r:35+Math.random()*85,life:1,vx:(Math.random()-.5)*.17,vy:(Math.random()-.5)*.09});dFog.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.life-=.0024;});dFog=dFog.filter(p=>p.life>0);if(dFog.length>55)dFog=dFog.slice(-55);const ph=PHASES['dep']&&PHASES['dep'][curPh];if(ph&&ph.dr&&dDropT>.9+Math.random()*.55){dDropT=0;const tx=CX+(Math.random()-.5)*Math.min(W,H)*.32,ty=CY+(Math.random()-.5)*Math.min(W,H)*.24;dDrops.push({x:tx+(Math.random()-.5)*55,y:ty-H*.27,tx,ty,life:1,sp:.7+Math.random()*.5,r:4+Math.random()*3,att:false});playDrop();}dDrops.forEach(d=>{if(!d.att){const dx=d.tx-d.x,dy=d.ty-d.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<5)d.att=true;else{d.x+=dx/dist*d.sp;d.y+=dy/dist*d.sp;}}else{d.life-=.01;d.r*=.993;}});dDrops=dDrops.filter(d=>d.life>0);dNeus.forEach((n,i)=>{n.ph+=n.sp*dCurSl;n.x=n.bx+Math.sin(dT*.1*dCurSl+i)*n.ws*dCurFog*.08;n.y=n.by+Math.cos(dT*.08*dCurSl+i)*n.ws*dCurFog*.055;const kt=1-(i/dNeus.length);n.fade=dCurFd>kt*.92?Math.min(1,n.fade+.003):Math.max(0,n.fade-.003);n.da=Math.max(.05,1-n.fade*.93);});dSyns.forEach(s=>s.t=(s.t+s.sp*dCurSl)%1);}
+function drawDep(){ctxA.clearRect(0,0,W,H);const bg=ctxA.createRadialGradient(CX,CY*.55,0,CX,CY,Math.max(W,H)*.8);bg.addColorStop(0,'#0c1020');bg.addColorStop(.5,'#08091a');bg.addColorStop(1,'#04060f');ctxA.fillStyle=bg;ctxA.fillRect(0,0,W,H);for(let i=0;i<70;i++){const sx=(Math.sin(i*127.3)*.5+.5)*W,sy=(Math.sin(i*311.7)*.5+.5)*H*.62;const sa=((.18+.25*Math.sin(dT*.5+i))*Math.max(0,1-dCurFog*1.1));if(sa>.01){ctxA.globalAlpha=sa;ctxA.fillStyle='rgba(160,190,255,.8)';ctxA.beginPath();ctxA.arc(sx,sy,.7,0,Math.PI*2);ctxA.fill();}}ctxA.globalAlpha=1;dFog.forEach(p=>{const g=ctxA.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);g.addColorStop(0,`rgba(35,55,120,${p.life*dCurFog*.19})`);g.addColorStop(1,'transparent');ctxA.fillStyle=g;ctxA.beginPath();ctxA.arc(p.x,p.y,p.r,0,Math.PI*2);ctxA.fill();});const pts=makeBrainPts();const fd=dCurFd;const bg2=ctxA.createRadialGradient(CX,CY,0,CX,CY,Math.min(W,H)*.22*1.2);bg2.addColorStop(0,`rgb(${L(15,8,fd)|0},${L(20,12,fd)|0},${L(30,15,fd)|0})`);bg2.addColorStop(1,`rgb(${L(8,4,fd)|0},${L(12,7,fd)|0},${L(48,22,fd)|0})`);const sc=Math.min(W,H);const folds=[[CX-sc*.12,CY-sc*.055,CX-sc*.07,CY-sc*.125,CX-sc*.01,CY-sc*.075,`rgba(60,100,180,${Math.max(0,.17-fd*.13)})`],[CX+sc*.02,CY-sc*.065,CX+sc*.075,CY-sc*.12,CX+sc*.13,CY-sc*.048,`rgba(60,100,180,${Math.max(0,.17-fd*.13)})`],[CX-sc*.08,CY+sc*.015,CX,CY+sc*.065,CX+sc*.07,CY+sc*.02,`rgba(60,100,180,${Math.max(0,.17-fd*.13)})`]];drawBrainBase(pts,bg2,`rgba(${L(80,40,fd)|0},${L(120,60,fd)|0},${L(200,100,fd)|0},${.3-fd*.17})`,2,`rgba(30,60,130,${.06+fd*.04})`,folds);dDrops.forEach(d=>{const a=d.life*.8;ctxA.shadowBlur=9;ctxA.shadowColor='rgba(100,150,255,.42)';ctxA.beginPath();ctxA.arc(d.x,d.y,d.r,0,Math.PI*2);ctxA.fillStyle=`rgba(100,150,225,${a})`;ctxA.fill();ctxA.shadowBlur=0;ctxA.strokeStyle=`rgba(100,150,225,${a*.32})`;ctxA.lineWidth=.8;ctxA.beginPath();ctxA.moveTo(d.x,d.y);ctxA.lineTo(d.x,d.y-d.r*1.7);ctxA.stroke();});dSyns.forEach(s=>{const nA=dNeus[s.a],nB=dNeus[s.b];const al=Math.min(nA.da,nB.da)*dCurSl*.42;if(al<.02)return;ctxA.strokeStyle=`rgba(80,130,220,${al*.3})`;ctxA.lineWidth=.8;ctxA.beginPath();ctxA.moveTo(nA.x,nA.y);ctxA.lineTo(nB.x,nB.y);ctxA.stroke();if(nA.fade>.78||nB.fade>.78)return;const px=nA.x+(nB.x-nA.x)*s.t,py=nA.y+(nB.y-nA.y)*s.t;ctxA.shadowBlur=7;ctxA.shadowColor='rgba(100,160,255,.52)';ctxA.beginPath();ctxA.arc(px,py,2.1,0,Math.PI*2);ctxA.fillStyle=`rgba(140,190,255,${al*.72})`;ctxA.fill();ctxA.shadowBlur=0;});dNeus.forEach(n=>{const sc2=1+.07*Math.sin(n.ph)*dCurSl,nr=n.r*sc2,a=n.da;const blue=L(180,68,n.fade);ctxA.shadowBlur=n.fade<.5?8:2;ctxA.shadowColor=`rgba(80,130,${blue|0},${a*.52})`;ctxA.beginPath();ctxA.arc(n.x,n.y,nr,0,Math.PI*2);ctxA.fillStyle=`rgba(${L(75,28,n.fade)|0},${L(135,55,n.fade)|0},${L(215,90,n.fade)|0},${a})`;ctxA.fill();ctxA.shadowBlur=0;if(n.fade>.58&&a>.1){ctxA.fillStyle=`rgba(80,120,200,${(n.fade-.58)*.43})`;ctxA.font=`${nr*1.25}px serif`;ctxA.textAlign='center';ctxA.textBaseline='middle';ctxA.fillText('z',n.x+nr*.7,n.y-nr*.7);}});}
+function loopDep(){updateDep();drawDep();}
+
+// ══════════════════════════════════════════════
+//  ALLUCINOGENI ENGINE
+// ══════════════════════════════════════════════
+let aNeus=[],aBLinks=[],aELinks=[],aMols=[];
+let aCurCh=0,aCurHs=0,aCurMp=0,aCurEl=0,aTgtCh=0,aTgtHs=0,aTgtMp=0,aTgtEl=0;
+let aT=0,aCT=0,aShimT=0;
+function buildAllu(){aNeus=[];aBLinks=[];const r=Math.min(W,H)*.2;for(let i=0;i<28;i++){const a=Math.random()*Math.PI*2,d=r*(.08+.92*Math.sqrt(Math.random()));aNeus.push({x:CX+Math.cos(a)*d*1.12,y:CY+Math.sin(a)*d*.76-r*.05,bx:CX+Math.cos(a)*d*1.12,by:CY+Math.sin(a)*d*.76-r*.05,r:3.8+Math.random()*4,ph:Math.random()*Math.PI*2,sp:.018+Math.random()*.022,hue:Math.random()*360,ws:Math.random()*100});}for(let i=0;i<aNeus.length;i++)for(let j=i+1;j<aNeus.length;j++){const dx=aNeus[i].bx-aNeus[j].bx,dy=aNeus[i].by-aNeus[j].by;if(Math.sqrt(dx*dx+dy*dy)<r*1.18&&Math.random()>.5)aBLinks.push({a:i,b:j,t:Math.random(),sp:.003+Math.random()*.004,hue:Math.random()*360});}}
+function A_allu_setPhase(p){aTgtCh=p.ch;aTgtHs=p.hs;aTgtMp=p.mp;aTgtEl=p.el;if(!p.mol)aMols=[];}
+function updateAllu(){aT+=.016;aCT+=.008;aShimT+=.016;aCurCh+=(aTgtCh-aCurCh)*.018;aCurHs+=(aTgtHs-aCurHs)*.015;aCurMp+=(aTgtMp-aCurMp)*.015;aCurEl+=(aTgtEl-aCurEl)*.04;if(soundOn&&ac&&aCurCh>.3&&aShimT>1.1/(aCurCh+.1)){aShimT=0;playShimmer();}const want=Math.round(aCurEl);while(aELinks.length<want){const a=Math.floor(Math.random()*aNeus.length),b=Math.floor(Math.random()*aNeus.length);if(a!==b)aELinks.push({a,b,t:Math.random(),sp:.008+Math.random()*.012,hue:Math.random()*360,life:1,grow:true});}while(aELinks.length>want+2&&aELinks.length>0)aELinks[Math.floor(Math.random()*aELinks.length)].grow=false;aELinks.forEach(l=>{l.t=(l.t+l.sp)%1;if(!l.grow)l.life-=.02;});aELinks=aELinks.filter(l=>l.life>0);const ph=PHASES['allu']&&PHASES['allu'][curPh];if(ph&&ph.mol&&Math.random()<.04){const a=Math.random()*Math.PI*2,dist=Math.min(W,H)*(.38+Math.random()*.18);aMols.push({x:CX+Math.cos(a)*dist,y:CY+Math.sin(a)*dist,tx:CX+(Math.random()-.5)*Math.min(W,H)*.3,ty:CY+(Math.random()-.5)*Math.min(W,H)*.22,sp:1+Math.random(),r:4+Math.random()*4,life:1,hue:Math.random()*360,att:false});}aMols.forEach(m=>{if(!m.att){const dx=m.tx-m.x,dy=m.ty-m.y,d=Math.sqrt(dx*dx+dy*dy);if(d<5)m.att=true;else{m.x+=dx/d*m.sp;m.y+=dy/d*m.sp;}}else m.life-=.007;});aMols=aMols.filter(m=>m.life>0);aNeus.forEach((n,i)=>{n.ph+=n.sp*(1+aCurCh*1.5);n.hue=(n.hue+aCurCh*2+aCurHs*.5)%360;if(aCurCh>.1){const w=aCurCh*12;n.x=n.bx+Math.sin(aT*1.1+n.ws)*w+Math.cos(aT*.7+n.ws*1.3)*w*.5;n.y=n.by+Math.cos(aT*.9+n.ws)*w*.7+Math.sin(aT*1.3+n.ws*.8)*w*.4;}else{n.x+=(n.bx-n.x)*.12;n.y+=(n.by-n.y)*.12;}});aBLinks.forEach(l=>{l.t=(l.t+l.sp*(1+aCurCh*2))%1;l.hue=(l.hue+aCurHs*1.5+1)%360;});}
+function drawAllu(){ctxA.clearRect(0,0,W,H);const bH=(aCT*30+aCurHs*60)%360;const bg=ctxA.createRadialGradient(CX,CY*.6,0,CX,CY,Math.max(W,H)*.8);bg.addColorStop(0,hsl(bH,40,4));bg.addColorStop(.5,hsl(bH+30,28,3));bg.addColorStop(1,hsl(bH+60,18,2));ctxA.fillStyle=bg;ctxA.fillRect(0,0,W,H);if(aCurCh>.15){for(let i=0;i<3;i++){const rH=(bH+i*120)%360,rR=Math.min(W,H)*(.14+i*.11+.04*Math.sin(aT*.4+i));const g=ctxA.createRadialGradient(CX,CY,0,CX,CY,rR);g.addColorStop(0,'transparent');g.addColorStop(.72,'transparent');g.addColorStop(.87,hsl(rH,80,50,aCurCh*.062));g.addColorStop(1,'transparent');ctxA.fillStyle=g;ctxA.beginPath();ctxA.arc(CX,CY,rR,0,Math.PI*2);ctxA.fill();}}const pts=makeBrainPts(aCurMp,aT);const abrH=(aCT*25+aCurHs*80)%360;const bg2=ctxA.createRadialGradient(CX,CY,0,CX,CY,Math.min(W,H)*.22*1.2);bg2.addColorStop(0,hsl(abrH,L(14,58,aCurCh),L(7,15,aCurCh)));bg2.addColorStop(1,hsl(abrH+40,L(9,48,aCurCh),L(4,9,aCurCh)));const sc=Math.min(W,H);const folds=[[CX-sc*.12,CY-sc*.055,CX-sc*.07,CY-sc*.125,CX-sc*.01,CY-sc*.075,hsl((abrH)%360,50,50,.17+aCurCh*.12)],[CX+sc*.02,CY-sc*.065,CX+sc*.075,CY-sc*.12,CX+sc*.13,CY-sc*.048,hsl((abrH+40)%360,50,50,.17+aCurCh*.12)],[CX-sc*.08,CY+sc*.015,CX,CY+sc*.065,CX+sc*.07,CY+sc*.02,hsl((abrH+80)%360,50,50,.17+aCurCh*.12)]];for(let layer=0;layer<(aCurCh>.5?3:1);layer++){const oH=(abrH+layer*60)%360;ctxA.shadowBlur=aCurCh>.3?9+layer*7:0;ctxA.shadowColor=hsl(oH,80,60,.52);drawBrainBase(pts,bg2,hsl(oH,70,55,.2+aCurCh*.26-layer*.05),2-layer*.3,hsl(abrH,60,20,.06+aCurCh*.08),folds);ctxA.shadowBlur=0;}const drawLinks2=(links,ba)=>links.forEach(l=>{const nA=aNeus[l.a],nB=aNeus[l.b];if(!nA||!nB)return;const la=ba*(l.life||1);ctxA.strokeStyle=hsl(l.hue,70,55,la*.27);ctxA.lineWidth=.75;ctxA.beginPath();ctxA.moveTo(nA.x,nA.y);ctxA.lineTo(nB.x,nB.y);ctxA.stroke();const px=nA.x+(nB.x-nA.x)*l.t,py=nA.y+(nB.y-nA.y)*l.t;ctxA.shadowBlur=9;ctxA.shadowColor=hsl(l.hue,90,65,.72);ctxA.beginPath();ctxA.arc(px,py,2.7*(l.life||1),0,Math.PI*2);ctxA.fillStyle=hsl(l.hue,90,70,la);ctxA.fill();ctxA.shadowBlur=0;});drawLinks2(aBLinks,.5);drawLinks2(aELinks,.78);aMols.forEach(m=>{ctxA.shadowBlur=12;ctxA.shadowColor=hsl(m.hue,90,60,.62);ctxA.beginPath();ctxA.arc(m.x,m.y,m.r,0,Math.PI*2);ctxA.fillStyle=hsl(m.hue,85,65,m.life*.86);ctxA.fill();ctxA.shadowBlur=0;for(let i=1;i<=2;i++){ctxA.beginPath();ctxA.arc(m.x,m.y,m.r*(1+i*.55),0,Math.PI*2);ctxA.strokeStyle=hsl(m.hue+i*30,80,60,m.life*.17);ctxA.lineWidth=.7;ctxA.stroke();}});aNeus.forEach(n=>{const sc2=1+.15*Math.sin(n.ph)+aCurCh*.1*Math.sin(n.ph*2.3),nr=n.r*sc2,nh=(n.hue+aCT*40)%360;ctxA.shadowBlur=7+aCurCh*13;ctxA.shadowColor=hsl(nh,90,60,.62);for(let layer=0;layer<(aCurCh>.5?3:1);layer++){ctxA.beginPath();ctxA.arc(n.x,n.y,nr*(1+layer*.65),0,Math.PI*2);ctxA.fillStyle=hsl((nh+layer*30)%360,80,50,Math.max(0,(.12-layer*.04)*(1-aCurCh*.28)));ctxA.fill();}ctxA.beginPath();ctxA.arc(n.x,n.y,nr,0,Math.PI*2);ctxA.fillStyle=hsl(nh,85,65);ctxA.fill();ctxA.shadowBlur=0;if(aCurCh>.6){ctxA.font=`${nr*1.22}px serif`;ctxA.textAlign='center';ctxA.textBaseline='middle';ctxA.globalAlpha=(aCurCh-.6)*2;ctxA.fillText(['👁','⊛','✦','◈','❋'][Math.floor(((n.ws*10)%5))],n.x,n.y);ctxA.globalAlpha=1;}});}
+function loopAllu(){updateAllu();drawAllu();}
+
+// ══════════════════════════════════════════════
+//  FINALE ENGINE
+// ══════════════════════════════════════════════
+const FINALE_DATA={
+  stim:{
+    eyebrow:'⚡ Droghe Stimolanti',
+    headline:'Sovraccarico & Crollo',
+    sub:'cosa ha vissuto il tuo sistema nervoso',
+    accentColor:'#ffcc00',
+    replayColor:'linear-gradient(90deg,#ffcc00,#ff6600)',
+    brainDamage:.88,
+    brainColor:'#ff6600',
+    verdict:'Le droghe stimolanti hanno <b>saturato</b> i circuiti della dopamina con una scarica fino a <b>10 volte</b> il normale. Il cervello, sopraffatto, ha ridotto i propri recettori per sopravvivere — ma così facendo ha perso la capacità di provare <b>piacere naturale</b>. Con l\'uso cronico, i terminali assonici si danneggiano in modo permanente: è la <b>neurotossicità</b> da stimolanti.',
+    bars:[
+      {label:'Dopamina',before:30,after:2,col:'#ffcc00'},
+      {label:'Noradrenalina',before:30,after:3,col:'#ff8c00'},
+      {label:'Serotonina',before:30,after:8,col:'#ff4500'},
+      {label:'Neuroni funzionali',before:100,after:36,col:'#ff2200'},
+    ],
+    rebuild:false,
+    finaleSound:{freq:55,vol:.08,lfo:0},
+  },
+  dep:{
+    eyebrow:'🌙 Droghe Depressive',
+    headline:'Il Grande Silenzio',
+    sub:'i neuroni che si spengono uno per uno',
+    accentColor:'#8ab4f8',
+    replayColor:'linear-gradient(90deg,#8ab4f8,#4466cc)',
+    brainDamage:.72,
+    brainColor:'#4466cc',
+    verdict:'I depressivi del S.N.C. hanno <b>amplificato il GABA</b>, il freno naturale del cervello, portandolo al silenzio. Il paradosso: smettere improvvisamente causa <b>crisi epilettiche</b> perché il cervello ha smesso di produrre il proprio GABA. Con gli oppioidi il rischio più grave è la <b>depressione respiratoria</b> — il cervello dimentica letteralmente di mandare il segnale di respirare.',
+    bars:[
+      {label:'Attività GABA',before:30,after:88,col:'#8ab4f8'},
+      {label:'Glutammato (eccit.)',before:60,after:8,col:'#4ecdc4'},
+      {label:'Riflessi attivi',before:100,after:7,col:'#3399ff'},
+      {label:'Frequenza respiratoria',before:70,after:12,col:'#2244aa'},
+    ],
+    rebuild:false,
+    finaleSound:{freq:32,vol:.1,lfo:.05},
+  },
+  allu:{
+    eyebrow:'✦ Allucinogeni Psicotropi',
+    headline:'La Mente Esplosa',
+    sub:'e la possibilità di guarire',
+    accentColor:'#c084fc',
+    replayColor:'linear-gradient(90deg,#ff6ec7,#a855f7,#38bdf8)',
+    brainDamage:.18,
+    brainColor:'#a855f7',
+    verdict:'Gli allucinogeni hanno creato una <b>tempesta di iperconnettività</b>: la Default Mode Network — il senso del sé — si è dissolta. A differenza di altre droghe, <b>non creano dipendenza fisica</b>. Ricerche recenti (Johns Hopkins, NYU) mostrano potenziale terapeutico per PTSD e depressione. Ma nei soggetti vulnerabili possono scatenare <b>psicosi latente</b> o HPPD permanente.',
+    bars:[
+      {label:'Recettori 5-HT2A',before:30,after:95,col:'#c084fc'},
+      {label:'Connessioni neurali',before:20,after:98,col:'#38bdf8'},
+      {label:'Coerenza rete DMN',before:80,after:4,col:'#ff6ec7'},
+      {label:'Danni fisici',before:5,after:8,col:'#a855f7'},
+    ],
+    rebuild:true,
+    finaleSound:{freq:85,vol:.07,lfo:.4},
+  },
+};
+
+let finaleRaf=null,finaleT=0;
+const cvF=document.getElementById('finale-canvas');
+const ctxF=cvF.getContext('2d');
+const cvB=document.getElementById('brain3d-canvas');
+const ctxB=cvB.getContext('2d');
+
+function openFinale(){
+  stopAllAnimLoops();stopDrone();stopAuto();
+  const fd=FINALE_DATA[currentAnim];
+  if(!fd)return;
+
+  // show screen
+  document.getElementById('s-anim').classList.remove('active');
+  document.getElementById('cv-anim').classList.remove('active');
+  document.getElementById('s-finale').classList.add('active');
+  cvF.width=innerWidth;cvF.height=innerHeight;
+
+  // theme text
+  document.getElementById('fin-eyebrow').textContent=fd.eyebrow;
+  document.getElementById('fin-headline').textContent=fd.headline;
+  document.getElementById('fin-headline').style.color=fd.accentColor;
+  document.getElementById('fin-headline').style.textShadow=`0 0 40px ${fd.accentColor}55`;
+  document.getElementById('fin-sub').textContent=fd.sub;
+  document.getElementById('fin-replay-btn').style.background=fd.replayColor;
+
+  // style verdict box accent
+  document.querySelector('.verdict-box').style.borderColor=fd.accentColor+'44';
+  document.getElementById('verdict-label').style.color=fd.accentColor;
+
+  // build bar chart
+  buildBars(fd);
+
+  // typewriter verdict
+  setTimeout(()=>typeWriter(fd.verdict,document.getElementById('vt-content'),document.getElementById('vcursor'),18),600);
+
+  // rebuild banner for allu
+  if(fd.rebuild){
+    setTimeout(()=>{
+      const rb=document.getElementById('rebuild-banner');
+      rb.style.color=fd.accentColor;
+      rb.style.textShadow=`0 0 20px ${fd.accentColor}`;
+      rb.classList.add('show');
+    },2800);
+  }
+
+  // audio
+  if(ac){currentDroneVol=fd.finaleSound.vol;startDrone(fd.finaleSound.freq,fd.finaleSound.vol,fd.finaleSound.lfo);}
+
+  finaleT=0;
+  if(finaleRaf){cancelAnimationFrame(finaleRaf);finaleRaf=null;}
+  function runF(){finaleRaf=requestAnimationFrame(runF);finaleT+=.016;drawFinale(fd);}
+  runF();
+  drawBrain3D(fd);
+}
+
+function closeFinale(){
+  if(finaleRaf){cancelAnimationFrame(finaleRaf);finaleRaf=null;}
+  document.getElementById('s-finale').classList.remove('active');
+  document.getElementById('rebuild-banner').classList.remove('show');
+}
+
+function replayAnim(){
+  closeFinale();
+  openAnim(currentAnim);
+}
+
+// ── Brain 3D rotating canvas ──────────────────
+let brain3DAngle=0,brain3DRaf=null;
+function drawBrain3D(fd){
+  if(brain3DRaf){cancelAnimationFrame(brain3DRaf);brain3DRaf=null;}
+  const bSize=Math.min(160, Math.min(innerWidth,innerHeight)*0.18);
+  cvB.width=bSize+20;cvB.height=bSize+20;
+  const cx2=cvB.width/2,cy2=cvB.height/2;
+  const dmg=fd.brainDamage;
+  const col=fd.brainColor;
+
+  function frame(){
+    brain3DRaf=requestAnimationFrame(frame);
+    brain3DAngle+=.012;
+    ctxB.clearRect(0,0,cvB.width,cvB.height);
+    const r=bSize*0.46;
+
+    // Shadow
+    const shadow=ctxB.createRadialGradient(cx2,cy2+r*.6,0,cx2,cy2+r*.6,r*.6);
+    shadow.addColorStop(0,`rgba(0,0,0,.3)`);shadow.addColorStop(1,'transparent');
+    ctxB.fillStyle=shadow;ctxB.beginPath();ctxB.ellipse(cx2,cy2+r*.55,r*.55,r*.22,0,0,Math.PI*2);ctxB.fill();
+
+    // 3D illusion: draw multiple ellipse "slices"
+    const slices=16;
+    for(let s=slices;s>=0;s--){
+      const t=s/slices; // 0=back, 1=front
+      const ang=brain3DAngle+t*Math.PI*2;
+      const xOff=Math.sin(ang)*r*.35;
+      const yOff=Math.cos(ang)*r*.12;
+      const sx=r*(0.55+0.45*Math.abs(Math.cos(ang+Math.PI)));
+      const sy=r*0.72;
+      const bright=0.3+0.7*(t);
+      const damaged=t<dmg;
+
+      // hemisphere fill
+      const hG=ctxB.createRadialGradient(cx2+xOff*.3,cy2+yOff*.3-r*.1,0,cx2+xOff,cy2+yOff,sx);
+      if(damaged){
+        hG.addColorStop(0,`rgba(80,40,50,${bright*.7})`);
+        hG.addColorStop(1,`rgba(40,15,20,${bright*.5})`);
+      }else{
+        hG.addColorStop(0,`${col}${Math.floor(bright*200).toString(16).padStart(2,'0')}`);
+        hG.addColorStop(1,`rgba(20,10,30,${bright*.4})`);
+      }
+      ctxB.beginPath();ctxB.ellipse(cx2+xOff,cy2+yOff,sx,sy,0,0,Math.PI*2);
+      ctxB.fillStyle=hG;ctxB.fill();
+
+      // fold lines on healthy slices
+      if(!damaged&&s%3===0){
+        ctxB.strokeStyle=`rgba(255,255,255,${bright*.08})`;ctxB.lineWidth=.8;
+        ctxB.beginPath();ctxB.ellipse(cx2+xOff,cy2+yOff-sy*.2,sx*.6,sy*.3,0,0,Math.PI);ctxB.stroke();
+      }
+    }
+
+    // Outer glow
+    const glow=ctxB.createRadialGradient(cx2,cy2,r*.4,cx2,cy2,r*.9);
+    glow.addColorStop(0,'transparent');
+    glow.addColorStop(1,`${col}22`);
+    ctxB.fillStyle=glow;ctxB.beginPath();ctxB.arc(cx2,cy2,r,0,Math.PI*2);ctxB.fill();
+
+    // damage cracks
+    if(dmg>.4){
+      ctxB.strokeStyle=`rgba(200,60,60,${dmg*.4})`;ctxB.lineWidth=1;
+      [[cx2-r*.2,cy2-r*.1,cx2-r*.35,cy2-r*.3],[cx2+r*.15,cy2+r*.05,cx2+r*.3,cy2+r*.25]].forEach(c=>{
+        ctxB.beginPath();ctxB.moveTo(c[0],c[1]);ctxB.lineTo(c[2],c[3]);ctxB.stroke();
+      });
+    }
+    // damage % label
+    ctxB.fillStyle=dmg>.5?`rgba(255,100,80,.9)`:`${col}cc`;
+    ctxB.font=`bold ${bSize*.11}px Nunito,sans-serif`;
+    ctxB.textAlign='center';ctxB.textBaseline='middle';
+    ctxB.fillText(`${Math.round((1-dmg)*100)}% sano`,cx2,cy2+r*.92);
+  }
+  frame();
+}
+
+// ── Animated bar chart ─────────────────────────
+function buildBars(fd){
+  const wrap=document.getElementById('chart-wrap');wrap.innerHTML='';
+  fd.bars.forEach((b,i)=>{
+    const row=document.createElement('div');row.className='bar-row';
+    row.innerHTML=`
+      <div class="bar-label"><span>${b.label}</span></div>
+      <div class="bar-track">
+        <div class="bar-fill-before" id="bf-${i}" style="width:0%;background:${b.col}"></div>
+        <div class="bar-fill-after"  id="ba-${i}" style="width:0%;background:${b.col}"></div>
+      </div>
+      <div class="bar-val" id="bv-${i}" style="color:${b.col}">prima: ${b.before}% → dopo: ${b.after}%</div>`;
+    wrap.appendChild(row);
+    // animate after stagger
+    setTimeout(()=>{
+      document.getElementById(`bf-${i}`).style.width=b.before+'%';
+    },400+i*180);
+    setTimeout(()=>{
+      document.getElementById(`ba-${i}`).style.width=b.after+'%';
+    },700+i*180);
+  });
+}
+
+// ── Typewriter ─────────────────────────────────
+function typeWriter(html,el,cursor,speed=18){
+  // strip tags for typewriter, re-inject bold markers
+  const plain=html.replace(/<b>/g,'«').replace(/<\/b>/g,'»');
+  let i=0,out='',inBold=false;
+  function step(){
+    if(i>=plain.length){cursor.style.display='none';return;}
+    const ch=plain[i];
+    if(ch==='«'){inBold=true;out+='<b>';}
+    else if(ch==='»'){inBold=false;out+='</b>';}
+    else{out+=ch==='<'?'&lt;':ch==='>'?'&gt;':ch;}
+    el.innerHTML=out+(inBold?'</b>':'');
+    i++;
+    setTimeout(step,speed+(ch==='.'||ch===','?120:0));
+  }
+  step();
+}
+
+// ── Finale particle background ─────────────────
+function drawFinale(fd){
+  ctxF.clearRect(0,0,cvF.width,cvF.height);
+  const W2=cvF.width,H2=cvF.height;
+
+  // deep bg
+  const bg=ctxF.createRadialGradient(W2/2,H2/2,0,W2/2,H2/2,Math.max(W2,H2)*.8);
+  bg.addColorStop(0,'#0a0612');bg.addColorStop(1,'#030208');
+  ctxF.fillStyle=bg;ctxF.fillRect(0,0,W2,H2);
+
+  // floating particles
+  const n=40;
+  for(let i=0;i<n;i++){
+    const px=(Math.sin(finaleT*.15+i*2.3)*.5+.5)*W2;
+    const py=(Math.cos(finaleT*.12+i*1.7)*.5+.5)*H2;
+    const pr=1+Math.sin(finaleT*.5+i)*.8;
+    const pa=.08+.05*Math.sin(finaleT*.3+i);
+    ctxF.beginPath();ctxF.arc(px,py,pr,0,Math.PI*2);
+    ctxF.fillStyle=fd.accentColor+Math.floor(pa*255).toString(16).padStart(2,'0');
+    ctxF.fill();
+  }
+
+  // top gradient line
+  const line=ctxF.createLinearGradient(0,0,W2,0);
+  line.addColorStop(0,'transparent');line.addColorStop(.5,fd.accentColor+'55');line.addColorStop(1,'transparent');
+  ctxF.fillStyle=line;ctxF.fillRect(0,0,W2,2);
+
+  // bottom gradient line
+  ctxF.fillStyle=line;ctxF.fillRect(0,H2-2,W2,2);
+
+  // center divider between left/right panels
+  const div=ctxF.createLinearGradient(W2/2,0,W2/2,H2);
+  div.addColorStop(0,'transparent');div.addColorStop(.3,fd.accentColor+'22');div.addColorStop(.7,fd.accentColor+'22');div.addColorStop(1,'transparent');
+  ctxF.fillStyle=div;ctxF.fillRect(W2/2-1,0,1,H2);
+}
+
+// ── Hook: show finale when last phase ends via auto ──
+function startAuto(){stopAuto();document.getElementById('abtn').textContent='⏸ Pausa';document.getElementById('abtn').classList.add('pl');
+  autoInt=setInterval(()=>{
+    const ph=PHASES[currentAnim];
+    if(curPh<ph.length-1){setPhase(curPh+1);}
+    else{stopAuto();setTimeout(openFinale,800);}
+  },5600);
+}
+
+// ══════════════════════════════════════════════
+//  SCENE BUILD ROUTER
+// ══════════════════════════════════════════════
+function buildAnimScene(){if(currentAnim==='stim')buildStim();else if(currentAnim==='dep')buildDep();else if(currentAnim==='allu')buildAllu();}
+
+// ══════════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════════
+resizeAll();
+buildIndex();
+startIndexLoop();
+</script>
+
+</body>
+</html>
